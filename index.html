@@ -198,5 +198,19 @@
     </footer>
 
     <script src="js/modules/navbar.js"></script>
+    <script>
+// 测试 CSS 是否加载
+fetch('css/global.css')
+    .then(response => {
+        if (response.ok) {
+            document.title = '✅ CSS 加载成功';
+        } else {
+            document.title = '❌ CSS 加载失败';
+        }
+    })
+    .catch(error => {
+        document.title = '❌ CSS 路径错误';
+    });
+</script>
 </body>
 </html>
