@@ -1,0 +1,437 @@
+/* ============================================
+   Rewind Lab - Create Page Styles
+   ============================================ */
+
+.create-main {
+    padding-top: 96px; /* 避开固定导航栏 */
+    padding-bottom: 48px;
+    min-height: 100vh;
+    background: var(--color-surface);
+}
+
+.create-container {
+    max-width: 900px;
+}
+
+/* 步骤指示器 */
+.stepper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 48px;
+    overflow-x: auto;
+    padding: 0 10px;
+}
+
+.step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 80px;
+    opacity: 0.5;
+    transition: all var(--transition-normal);
+}
+
+.step.active {
+    opacity: 1;
+}
+
+.step-number {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--color-border);
+    color: var(--color-text-light);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    margin-bottom: 8px;
+    transition: all var(--transition-normal);
+}
+
+.step.active .step-number {
+    background: var(--color-primary);
+    color: #fff;
+}
+
+.step-text {
+    font-size: 13px;
+    color: var(--color-text-light);
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+.step.active .step-text {
+    color: var(--color-primary);
+    font-weight: 600;
+}
+
+.step-divider {
+    width: 20px;
+    height: 2px;
+    background: var(--color-border);
+    margin: 0 8px;
+    margin-bottom: 20px;
+}
+
+/* 步骤内容区域 */
+.step-content {
+    display: none;
+    animation: fadeIn 0.3s ease;
+}
+
+.step-content.active {
+    display: block;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.step-header {
+    text-align: center;
+    margin-bottom: 32px;
+}
+
+.step-header h2 {
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--color-text);
+    margin-bottom: 8px;
+}
+
+.step-header p {
+    color: var(--color-text-light);
+}
+
+/* 上传区域 */
+.upload-zone {
+    border: 2px dashed var(--color-border);
+    border-radius: var(--radius-lg);
+    padding: 48px 24px;
+    text-align: center;
+    background: var(--color-background);
+    cursor: pointer;
+    transition: all var(--transition-normal);
+}
+
+.upload-zone:hover,
+.upload-zone.dragover {
+    border-color: var(--color-primary);
+    background: rgba(230, 126, 34, 0.05);
+}
+
+.upload-icon {
+    color: var(--color-primary);
+    margin-bottom: 16px;
+}
+
+.upload-text {
+    font-size: 18px;
+    color: var(--color-text);
+    margin-bottom: 8px;
+}
+
+.upload-hint {
+    font-size: 14px;
+    color: var(--color-text-light);
+}
+
+.file-preview {
+    background: var(--color-background);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 16px;
+}
+
+.file-preview.hidden {
+    display: none;
+}
+
+.file-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.file-icon {
+    font-size: 24px;
+}
+
+.file-name {
+    font-weight: 600;
+    color: var(--color-text);
+}
+
+.file-size {
+    color: var(--color-text-light);
+    font-size: 14px;
+}
+
+.btn-sm {
+    padding: 6px 12px;
+    font-size: 14px;
+}
+
+.btn-outline {
+    background: transparent;
+    border: 1px solid var(--color-border);
+    color: var(--color-text-light);
+}
+
+.btn-outline:hover {
+    border-color: var(--color-error);
+    color: var(--color-error);
+}
+
+/* 步骤操作按钮 */
+.step-actions {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 48px;
+    gap: 16px;
+}
+
+.step-actions .btn {
+    flex: 1;
+}
+
+/* 风格选择网格 */
+.style-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 16px;
+}
+
+.style-card {
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: all var(--transition-normal);
+}
+
+.style-card:hover {
+    transform: translateY(-4px);
+}
+
+.style-card.selected {
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 4px rgba(230, 126, 34, 0.2);
+}
+
+.style-thumb {
+    height: 120px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    border-radius: var(--radius-md) var(--radius-md) 0 0;
+    position: relative;
+}
+
+.style-info {
+    padding: 16px;
+    background: var(--color-background);
+    border-radius: 0 0 var(--radius-md) var(--radius-md);
+    border: 1px solid var(--color-border);
+    border-top: none;
+}
+
+.style-info h3 {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 4px;
+}
+
+.style-info p {
+    font-size: 12px;
+    color: var(--color-text-light);
+}
+
+/* 参数面板 */
+.params-panel {
+    background: var(--color-background);
+    border-radius: var(--radius-lg);
+    padding: 32px;
+    box-shadow: var(--shadow-sm);
+}
+
+.param-group {
+    margin-bottom: 24px;
+}
+
+.param-group:last-child {
+    margin-bottom: 0;
+}
+
+.param-group label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: var(--color-text);
+}
+
+.slider {
+    width: 100%;
+    height: 6px;
+    border-radius: 3px;
+    background: var(--color-border);
+    outline: none;
+    -webkit-appearance: none;
+}
+
+.slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: var(--color-primary);
+    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.param-value {
+    display: inline-block;
+    margin-top: 8px;
+    font-size: 14px;
+    color: var(--color-primary);
+    font-weight: 600;
+}
+
+.toggle-group {
+    display: flex;
+    gap: 16px;
+}
+
+.toggle-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    color: var(--color-text-light);
+}
+
+.toggle-label input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    accent-color: var(--color-primary);
+}
+
+/* 处理中区域 */
+.processing-zone {
+    text-align: center;
+    padding: 48px 24px;
+    background: var(--color-background);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--color-border);
+}
+
+.loading-spinner {
+    margin-bottom: 24px;
+}
+
+.spinner {
+    width: 48px;
+    height: 48px;
+    border: 4px solid var(--color-border);
+    border-top-color: var(--color-primary);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+.processing-status {
+    font-weight: 600;
+    color: var(--color-text);
+    margin-bottom: 16px;
+}
+
+.progress-bar {
+    height: 8px;
+    background: var(--color-border);
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 16px;
+}
+
+.progress-fill {
+    height: 100%;
+    background: var(--color-primary);
+    width: 0%;
+    transition: width 0.3s ease;
+}
+
+.processing-hint {
+    font-size: 14px;
+    color: var(--color-text-light);
+}
+
+/* 下载区域 */
+.download-zone {
+    text-align: center;
+    padding: 48px 24px;
+    background: var(--color-background);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--color-border);
+}
+
+.success-icon {
+    color: var(--color-success);
+    margin-bottom: 16px;
+}
+
+.download-zone h3 {
+    font-size: 24px;
+    margin-bottom: 8px;
+    color: var(--color-text);
+}
+
+.download-zone p {
+    color: var(--color-text-light);
+    margin-bottom: 24px;
+}
+
+.download-actions {
+    display: flex;
+    gap: 16px;
+    justify-content: center;
+    max-width: 400px;
+    margin: 0 auto;
+}
+
+.download-actions .btn {
+    flex: 1;
+}
+
+/* 响应式适配 */
+@media (max-width: 768px) {
+    .stepper {
+        justify-content: flex-start;
+        padding: 0 20px;
+    }
+    .step-text {
+        display: none;
+    }
+    .step-divider {
+        width: 40px;
+    }
+    .step-actions {
+        flex-direction: column;
+    }
+    .style-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    .download-actions {
+        flex-direction: column;
+    }
+}
