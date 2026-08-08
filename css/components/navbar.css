@@ -164,4 +164,27 @@
     .nav-toggle.active .hamburger-line:nth-child(3) {
         transform: rotate(-45deg) translate(7px, -6px);
     }
+   /* iPad 分屏模式触摸反馈 */
+.nav-toggle {
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+    cursor: pointer;
+}
+
+.nav-toggle:active {
+    transform: scale(0.95);
+}
+
+/* 确保汉堡菜单在移动端可见 */
+@media (max-width: 768px) {
+    .nav-toggle {
+        display: flex !important;
+        z-index: 1001;
+        background: var(--color-background);
+    }
+    
+    .nav-menu {
+        z-index: 1001;
+    }
+}
 }
