@@ -1,0 +1,425 @@
+/* ============================================
+   Rewind Lab - Global Styles V1.0
+   品牌色: 🟠 暖琥珀 #E67E22
+   ============================================ */
+
+:root {
+    /* 颜色变量 */
+    --color-primary: #E67E22;          /* 主品牌色 - 暖琥珀 */
+    --color-primary-dark: #D35400;     /* 深琥珀 */
+    --color-primary-light: #F4A261;    /* 浅琥珀 */
+    --color-background: #FFFFFF;       /* 纯白背景 */
+    --color-surface: #FAFAFA;          /* 卡片背景 */
+    --color-text: #2D3748;             /* 深灰文字 */
+    --color-text-light: #718096;       /* 浅灰辅助文字 */
+    --color-border: #E2E8F0;           /* 边框颜色 */
+    --color-success: #48BB78;          /* 成功绿 */
+    --color-error: #E53E3E;            /* 错误红 */
+
+    /* 间距变量 */
+    --space-xs: 4px;
+    --space-sm: 8px;
+    --space-md: 16px;
+    --space-lg: 24px;
+    --space-xl: 32px;
+    --space-2xl: 48px;
+
+    /* 圆角 */
+    --radius-sm: 4px;
+    --radius-md: 8px;
+    --radius-lg: 12px;
+
+    /* 阴影 */
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
+    --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+    --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+
+    /* 动画 */
+    --transition-fast: 150ms ease;
+    --transition-normal: 250ms ease;
+}
+
+/* 重置样式 */
+*,
+*::before,
+*::after {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+    font-size: 16px;
+    line-height: 1.6;
+    color: var(--color-text);
+    background-color: var(--color-background);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* 通用容器 */
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 var(--space-lg);
+}
+
+/* 按钮 */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 12px 24px;
+    font-size: 16px;
+    font-weight: 500;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    text-decoration: none;
+    transition: all var(--transition-normal);
+    border: 2px solid transparent;
+}
+
+.btn-primary {
+    background-color: var(--color-primary);
+    color: #fff;
+    border-color: var(--color-primary);
+}
+
+.btn-primary:hover {
+    background-color: var(--color-primary-dark);
+    border-color: var(--color-primary-dark);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.btn-secondary {
+    background-color: transparent;
+    color: var(--color-text);
+    border-color: var(--color-border);
+}
+
+.btn-secondary:hover {
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+}
+
+/* 卡片 */
+.card {
+    background: var(--color-surface);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+    transition: all var(--transition-normal);
+}
+
+.card:hover {
+    box-shadow: var(--shadow-lg);
+    transform: translateY(-4px);
+}
+
+/* Hero 首屏 */
+.hero {
+    padding: var(--space-2xl) 0;
+    text-align: center;
+    min-height: 60vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(180deg, var(--color-background) 0%, var(--color-surface) 100%);
+}
+
+.hero-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: var(--space-xl);
+}
+
+.hero-title {
+    font-size: 48px;
+    font-weight: 700;
+    color: var(--color-text);
+    margin-bottom: var(--space-md);
+    letter-spacing: -0.02em;
+}
+
+.hero-subtitle {
+    font-size: 28px;
+    font-weight: 600;
+    color: var(--color-primary);
+    margin-bottom: var(--space-sm);
+}
+
+.hero-description {
+    font-size: 18px;
+    color: var(--color-text-light);
+    margin-bottom: var(--space-xl);
+}
+
+.hero-cta {
+    display: flex;
+    gap: var(--space-md);
+    justify-content: center;
+    margin-bottom: var(--space-xl);
+    flex-wrap: wrap;
+}
+
+.hero-badges {
+    display: flex;
+    gap: var(--space-sm);
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.badge {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-xs);
+    padding: 6px 12px;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    font-size: 14px;
+    color: var(--color-text-light);
+}
+
+/* 章节标题 */
+.section-title {
+    font-size: 32px;
+    font-weight: 700;
+    text-align: center;
+    margin-bottom: var(--space-sm);
+}
+
+.section-subtitle {
+    font-size: 16px;
+    color: var(--color-text-light);
+    text-align: center;
+    margin-bottom: var(--space-2xl);
+}
+
+/* 案例网格 */
+.cases {
+    padding: var(--space-2xl) 0;
+    background: var(--color-surface);
+}
+
+.cases-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: var(--space-lg);
+}
+
+.case-card {
+    background: var(--color-background);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+    transition: all var(--transition-normal);
+}
+
+.case-card:hover {
+    box-shadow: var(--shadow-lg);
+    transform: translateY(-4px);
+}
+
+.case-thumbnail {
+    height: 160px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    position: relative;
+}
+
+.case-label {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    font-size: 12px;
+    font-weight: 600;
+    background: rgba(0, 0, 0, 0.5);
+    padding: 4px 8px;
+    border-radius: var(--radius-sm);
+    letter-spacing: 0.1em;
+}
+
+.case-icon {
+    opacity: 0.8;
+}
+
+.case-info {
+    padding: var(--space-lg);
+}
+
+.case-info h3 {
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: var(--space-xs);
+}
+
+.case-era {
+    font-size: 13px;
+    color: var(--color-primary);
+    font-weight: 500;
+    margin-bottom: var(--space-xs);
+}
+
+.case-features {
+    font-size: 14px;
+    color: var(--color-text-light);
+}
+
+/* 承诺卡片 */
+.promises {
+    padding: var(--space-2xl) 0;
+}
+
+.promises-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: var(--space-lg);
+}
+
+.promise-card {
+    text-align: center;
+    padding: var(--space-xl);
+    background: var(--color-surface);
+    border-radius: var(--radius-lg);
+    transition: all var(--transition-normal);
+}
+
+.promise-card:hover {
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+}
+
+.promise-icon {
+    color: var(--color-primary);
+    margin-bottom: var(--space-md);
+}
+
+.promise-card h3 {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: var(--space-sm);
+}
+
+.promise-card p {
+    font-size: 14px;
+    color: var(--color-text-light);
+}
+
+/* 页脚 */
+.footer {
+    background: var(--color-text);
+    color: #fff;
+    padding: var(--space-2xl) 0 var(--space-lg);
+}
+
+.footer-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-lg);
+    text-align: center;
+}
+
+.footer-brand {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.footer-logo {
+    width: 32px;
+    height: 32px;
+    filter: brightness(0) invert(1);
+}
+
+.footer-links {
+    display: flex;
+    gap: var(--space-lg);
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.footer-links a {
+    color: #A0AEC0;
+    text-decoration: none;
+    font-size: 14px;
+    transition: color var(--transition-fast);
+}
+
+.footer-links a:hover {
+    color: var(--color-primary-light);
+}
+
+.footer-meta {
+    display: flex;
+    gap: var(--space-lg);
+    font-size: 13px;
+    color: #718096;
+    margin-top: var(--space-md);
+    padding-top: var(--space-md);
+    border-top: 1px solid #4A5568;
+    width: 100%;
+    justify-content: center;
+    gap: var(--space-lg);
+}
+
+/* 页脚品牌标语 */
+.footer-tagline {
+    margin-left: var(--space-sm);
+    font-size: 13px;
+    font-weight: 400;
+    color: var(--color-primary-light);
+    letter-spacing: 0.05em;
+}
+
+/* 响应式适配 */
+@media (max-width: 768px) {
+    .hero-title {
+        font-size: 36px;
+    }
+    .hero-subtitle {
+        font-size: 22px;
+    }
+    .hero-cta {
+        flex-direction: column;
+        align-items: center;
+    }
+    .hero-cta .btn {
+        width: 100%;
+        max-width: 280px;
+    }
+    .section-title {
+        font-size: 26px;
+    }
+    .cases-grid,
+    .promises-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 480px) {
+    .container {
+        padding: 0 var(--space-md);
+    }
+    .hero {
+        padding: var(--space-lg) 0;
+    }
+    .hero-title {
+        font-size: 30px;
+    }
+    .badge {
+        font-size: 12px;
+        padding: 4px 8px;
+    }
+}
