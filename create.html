@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Rewind Lab 创作中心 - 上传视频，选择复古风格，本地处理。">
+    <title>创作中心 | Rewind Lab</title>
+    <link rel="stylesheet" href="../css/global.css">
+    <link rel="stylesheet" href="../css/components/navbar.css">
+    <link rel="stylesheet" href="../css/pages/create.css">
+    <link rel="icon" href="../assets/images/logo.svg" type="image/svg+xml">
+</head>
+<body>
+
+    <!-- 导航栏 -->
+    <nav class="navbar" id="navbar">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <img src="../assets/images/logo.svg" alt="Rewind Lab Logo" class="nav-logo">
+                <span class="nav-title">Rewind Lab</span>
+            </div>
+            <ul class="nav-menu" id="navMenu">
+                <li><a href="index.html" class="nav-link">首页</a></li>
+                <li><a href="styles.html" class="nav-link">风格</a></li>
+                <li><a href="help.html" class="nav-link">帮助</a></li>
+                <li><a href="about.html" class="nav-link">关于</a></li>
+                <li><a href="create.html" class="nav-btn nav-btn-primary active">立即创作</a></li>
+            </ul>
+            <button class="nav-toggle" id="navToggle" aria-label="菜单">
+                <span class="hamburger-line"></span>
+                <span class="hamburger-line"></span>
+                <span class="hamburger-line"></span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- 主体内容 -->
+    <main class="create-main">
+        <div class="container create-container">
+            
+            <!-- 步骤指示器 -->
+            <div class="stepper">
+                <div class="step active" data-step="1">
+                    <span class="step-number">1</span>
+                    <span class="step-text">上传视频</span>
+                </div>
+                <div class="step-divider"></div>
+                <div class="step" data-step="2">
+                    <span class="step-number">2</span>
+                    <span class="step-text">选择风格</span>
+                </div>
+                <div class="step-divider"></div>
+                <div class="step" data-step="3">
+                    <span class="step-number">3</span>
+                    <span class="step-text">调整参数</span>
+                </div>
+                <div class="step-divider"></div>
+                <div class="step" data-step="4">
+                    <span class="step-number">4</span>
+                    <span class="step-text">本地处理</span>
+                </div>
+                <div class="step-divider"></div>
+                <div class="step" data-step="5">
+                    <span class="step-number">5</span>
+                    <span class="step-text">下载作品</span>
+                </div>
+            </div>
+
+            <!-- 步骤 1: 上传视频 -->
+            <section class="step-content active" id="step-1">
+                <div class="step-header">
+                    <h2>上传视频</h2>
+                    <p>支持 MP4, MOV, AVI 格式。所有数据仅在浏览器本地处理，不会上传至服务器。</p>
+                </div>
+                
+                <div class="upload-zone" id="uploadZone">
+                    <div class="upload-icon">
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
+                        </svg>
+                    </div>
+                    <p class="upload-text"><strong>点击上传</strong> 或拖拽视频到此处</p>
+                    <p class="upload-hint">最大支持 500MB (本地处理速度取决于您的设备)</p>
+                    <input type="file" id="fileInput" accept="video/*" hidden>
+                </div>
+
+                <div class="file-preview hidden" id="filePreview">
+                    <div class="file-info">
+                        <span class="file-icon">🎬</span>
+                        <span class="file-name" id="fileName">example.mp4</span>
+                        <span class="file-size" id="fileSize">12.5 MB</span>
+                    </div>
+                    <button class="btn btn-sm btn-outline" id="removeFile">移除</button>
+                </div>
+
+                <div class="step-actions">
+                    <button class="btn btn-secondary" disabled>上一步</button>
+                    <button class="btn btn-primary" id="btn-step-1-next" disabled>下一步：选择风格</button>
+                </div>
+            </section>
+
+            <!-- 步骤 2: 选择风格 -->
+            <section class="step-content" id="step-2">
+                <div class="step-header">
+                    <h2>选择风格</h2>
+                    <p>选择您想回溯的年代，AI 将推荐最佳复古参数。</p>
+                </div>
+
+                <div class="style-grid">
+                    <div class="style-card selectable" data-style="vhs">
+                        <div class="style-thumb" style="background: linear-gradient(135deg, #4a5568, #2d3748);">
+                            <span class="case-label">VHS</span>
+                        </div>
+                        <div class="style-info">
+                            <h3>VHS 录像带</h3>
+                            <p>1980s-90s · 磁带颗粒 · 扫描线</p>
+                        </div>
+                    </div>
+                    <div class="style-card selectable" data-style="film">
+                        <div class="style-thumb" style="background: linear-gradient(135deg, #744210, #44337a);">
+                            <span class="case-label">FILM</span>
+                        </div>
+                        <div class="style-info">
+                            <h3>经典胶片</h3>
+                            <p>1970s-80s · 胶片颗粒 · 电影感</p>
+                        </div>
+                    </div>
+                    <div class="style-card selectable" data-style="dv">
+                        <div class="style-thumb" style="background: linear-gradient(135deg, #2c5282, #1a365d);">
+                            <span class="case-label">DV</span>
+                        </div>
+                        <div class="style-info">
+                            <h3>数字摄像机</h3>
+                            <p>1990s-00s · 像素感 · 时间戳</p>
+                        </div>
+                    </div>
+                    <div class="style-card selectable" data-style="cam">
+                        <div class="style-thumb" style="background: linear-gradient(135deg, #553c9a, #2d3748);">
+                            <span class="case-label">CAM</span>
+                        </div>
+                        <div class="style-info">
+                            <h3>家庭录像</h3>
+                            <p>1980s-90s · 晃动感 · 暖黄光</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="step-actions">
+                    <button class="btn btn-secondary" id="btn-step-2-prev">上一步</button>
+                    <button class="btn btn-primary" id="btn-step-2-next" disabled>下一步：调整参数</button>
+                </div>
+            </section>
+
+            <!-- 步骤 3: 调整参数 -->
+            <section class="step-content" id="step-3">
+                <div class="step-header">
+                    <h2>调整参数</h2>
+                    <p>微调复古效果强度，点击预览可实时查看。</p>
+                </div>
+
+                <div class="params-panel">
+                    <div class="param-group">
+                        <label>复古强度 (Intensity)</label>
+                        <input type="range" min="0" max="100" value="50" class="slider" id="paramIntensity">
+                        <span class="param-value">50%</span>
+                    </div>
+                    <div class="param-group">
+                        <label>颗粒感 (Grain)</label>
+                        <input type="range" min="0" max="100" value="30" class="slider" id="paramGrain">
+                        <span class="param-value">30%</span>
+                    </div>
+                    <div class="param-group">
+                        <label>色彩偏移 (Color Shift)</label>
+                        <input type="range" min="0" max="100" value="20" class="slider" id="paramColor">
+                        <span class="param-value">20%</span>
+                    </div>
+                    <div class="param-group">
+                        <label>时间戳 (Timestamp)</label>
+                        <div class="toggle-group">
+                            <label class="toggle-label"><input type="checkbox" checked> 显示</label>
+                            <label class="toggle-label"><input type="checkbox"> 隐藏</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="step-actions">
+                    <button class="btn btn-secondary" id="btn-step-3-prev">上一步</button>
+                    <button class="btn btn-primary" id="btn-step-3-next">下一步：开始处理</button>
+                </div>
+            </section>
+
+            <!-- 步骤 4: 本地处理 -->
+            <section class="step-content" id="step-4">
+                <div class="step-header">
+                    <h2>本地处理中</h2>
+                    <p>正在应用复古滤镜，请勿关闭页面。处理完成后即可下载。</p>
+                </div>
+
+                <div class="processing-zone">
+                    <div class="loading-spinner">
+                        <div class="spinner"></div>
+                    </div>
+                    <p class="processing-status" id="processingStatus">正在初始化滤镜引擎...</p>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressFill"></div>
+                    </div>
+                    <p class="processing-hint">处理完全在您的浏览器中进行，无需上传。</p>
+                </div>
+
+                <div class="step-actions">
+                    <button class="btn btn-secondary" id="btn-step-4-prev">返回调整</button>
+                    <button class="btn btn-primary" id="btn-step-4-next" disabled>开始转换</button>
+                </div>
+            </section>
+
+            <!-- 步骤 5: 下载作品 -->
+            <section class="step-content" id="step-5">
+                <div class="step-header">
+                    <h2>下载作品</h2>
+                    <p>转换完成！您的复古视频已准备就绪。</p>
+                </div>
+
+                <div class="download-zone">
+                    <div class="success-icon">
+                        <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                            <circle cx="12" cy="12" r="10"/><polyline points="9 12 11.5 14.5 16 9"/>
+                        </svg>
+                    </div>
+                    <h3>转换成功！</h3>
+                    <p>视频已应用复古风格，即将在本地生成。</p>
+                    <div class="download-actions">
+                        <button class="btn btn-primary" id="btnDownload">下载视频</button>
+                        <button class="btn btn-secondary" id="btnRecreate">再创作一个</button>
+                    </div>
+                </div>
+            </section>
+
+        </div>
+    </main>
+
+    <script src="../js/modules/navbar.js"></script>
+    <script src="../js/modules/create.js"></script>
+</body>
+</html>
