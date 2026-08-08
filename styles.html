@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Rewind Lab 风格图鉴 - 探索不同年代的经典影像风格。">
+    <title>风格图鉴 | Rewind Lab</title>
+    <link rel="stylesheet" href="../css/global.css">
+    <link rel="stylesheet" href="../css/components/navbar.css">
+    <link rel="stylesheet" href="../css/pages/styles.css">
+    <link rel="icon" href="../assets/images/logo.jpg" type="image/jpeg">
+</head>
+<body>
+
+    <!-- 导航栏 -->
+    <nav class="navbar" id="navbar">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <img src="assets/images/logo.jpg" alt="Rewind Lab Logo" class="nav-logo">
+                <span class="nav-title">Rewind Lab</span>
+            </div>
+            <ul class="nav-menu" id="navMenu">
+                <li><a href="index.html" class="nav-link">首页</a></li>
+                <li><a href="styles.html" class="nav-link active">风格</a></li>
+                <li><a href="help.html" class="nav-link">帮助</a></li>
+                <li><a href="about.html" class="nav-link">关于</a></li>
+                <li><a href="create.html" class="nav-btn nav-btn-primary">立即创作</a></li>
+            </ul>
+            <button class="nav-toggle" id="navToggle" aria-label="菜单">
+                <span class="hamburger-line"></span>
+                <span class="hamburger-line"></span>
+                <span class="hamburger-line"></span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- 主体内容 -->
+    <main class="styles-main">
+        
+        <!-- Hero 区域 -->
+        <section class="styles-hero">
+            <div class="container">
+                <h1 class="styles-title">风格图鉴</h1>
+                <p class="styles-subtitle">一本影像风格百科，探索不同年代的经典质感</p>
+                <p class="styles-quote">"每种复古风格，都是那个时代独有的视觉语言"</p>
+            </div>
+        </section>
+
+        <!-- 筛选栏 -->
+        <section class="styles-filter">
+            <div class="container">
+                <div class="filter-tabs">
+                    <button class="filter-tab active" data-filter="all">全部</button>
+                    <button class="filter-tab" data-filter="1970s">1970s</button>
+                    <button class="filter-tab" data-filter="1980s">1980s</button>
+                    <button class="filter-tab" data-filter="1990s">1990s</button>
+                    <button class="filter-tab" data-filter="2000s">2000s</button>
+                </div>
+                <div class="filter-search">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                    </svg>
+                    <input type="text" id="searchInput" placeholder="搜索风格关键词...">
+                </div>
+            </div>
+        </section>
+
+        <!-- 风格网格 -->
+        <section class="styles-content">
+            <div class="container">
+                <div class="styles-grid" id="stylesGrid">
+
+                    <!-- VHS 录像带 -->
+                    <article class="style-item" data-decade="1980s" data-keywords="vhs 录像带 磁带 颗粒 扫描线 80年代 90年代">
+                        <div class="style-card">
+                            <div class="style-thumbnail" style="background: linear-gradient(135deg, #4a5568, #2d3748);">
+                                <span class="style-era-badge">1980s-90s</span>
+                                <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="style-icon">
+                                    <rect x="2" y="6" width="20" height="12" rx="2"/><line x1="6" y1="10" x2="6" y2="14"/><line x1="10" y1="10" x2="10" y2="14"/><line x1="14" y1="10" x2="14" y2="14"/><line x1="18" y1="10" x2="18" y2="14"/>
+                                </svg>
+                            </div>
+                            <div class="style-body">
+                                <h3 class="style-name">VHS 录像带</h3>
+                                <p class="style-en">Video Home System</p>
+                                <div class="style-features">
+                                    <span class="feature-tag">磁带颗粒</span>
+                                    <span class="feature-tag">扫描线</span>
+                                    <span class="feature-tag">暖色调</span>
+                                </div>
+                                <p class="style-story">磁带噪点，那是时间的呼吸声。1980 年代的家庭影像记忆，温暖而模糊。</p>
+                                <div class="style-use">
+                                    <strong>推荐用途：</strong>生日录像、家庭聚会、怀旧 Vlog
+                                </div>
+                            </div>
+                            <button class="style-detail-btn">查看详情 →</button>
+                        </div>
+                    </article>
+
+                    <!-- 经典胶片 -->
+                    <article class="style-item" data-decade="1970s" data-keywords="film 胶片 电影 颗粒 色彩 70年代 80年代">
+                        <div class="style-card">
+                            <div class="style-thumbnail" style="background: linear-gradient(135deg, #744210, #44337a);">
+                                <span class="style-era-badge">1970s-80s</span>
+                                <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="style-icon">
+                                    <rect x="2" y="2" width="20" height="20" rx="2"/><line x1="2" y1="8" x2="22" y2="8"/><line x1="2" y1="16" x2="22" y2="16"/><line x1="8" y1="2" x2="8" y2="8"/><line x1="16" y1="2" x2="16" y2="8"/><line x1="8" y1="16" x2="8" y2="22"/><line x1="16" y1="16" x2="16" y2="22"/>
+                                </svg>
+                            </div>
+                            <div class="style-body">
+                                <h3 class="style-name">经典胶片</h3>
+                                <p class="style-en">Classic Film</p>
+                                <div class="style-features">
+                                    <span class="feature-tag">胶片颗粒</span>
+                                    <span class="feature-tag">电影色彩</span>
+                                    <span class="feature-tag">高动态</span>
+                                </div>
+                                <p class="style-story">胶片颗粒，留住光线原本的质感。70-80 年代电影工业的黄金时代。</p>
+                                <div class="style-use">
+                                    <strong>推荐用途：</strong>旅行纪录片、电影感 Vlog、艺术短片
+                                </div>
+                            </div>
+                            <button class="style-detail-btn">查看详情 →</button>
+                        </div>
+                    </article>
+
+                    <!-- DV 数字摄像机 -->
+                    <article class="style-item" data-decade="1990s" data-keywords="dv 数字 摄像机 像素 时间戳 90年代 00年代">
+                        <div class="style-card">
+                            <div class="style-thumbnail" style="background: linear-gradient(135deg, #2c5282, #1a365d);">
+                                <span class="style-era-badge">1990s-2000s</span>
+                                <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="style-icon">
+                                    <rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="3"/><circle cx="18" cy="9" r="1"/>
+                                </svg>
+                            </div>
+                            <div class="style-body">
+                                <h3 class="style-name">数字摄像机</h3>
+                                <p class="style-en">Digital Video</p>
+                                <div class="style-features">
+                                    <span class="feature-tag">数字像素</span>
+                                    <span class="feature-tag">时间戳</span>
+                                    <span class="feature-tag">冷色调</span>
+                                </div>
+                                <p class="style-story">数字像素，找回千禧年的电子感。DV 时代记录下的家庭记忆与街头文化。</p>
+                                <div class="style-use">
+                                    <strong>推荐用途：</strong>千禧年复古、电子感 MV、Y2K 风格内容
+                                </div>
+                            </div>
+                            <button class="style-detail-btn">查看详情 →</button>
+                        </div>
+                    </article>
+
+                    <!-- 家庭录像 -->
+                    <article class="style-item" data-decade="1980s" data-keywords="cam 家庭 录像 晃动 暖黄 回忆 80年代 90年代">
+                        <div class="style-card">
+                            <div class="style-thumbnail" style="background: linear-gradient(135deg, #553c9a, #2d3748);">
+                                <span class="style-era-badge">1980s-90s</span>
+                                <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="style-icon">
+                                    <rect x="2" y="7" width="16" height="10" rx="2"/><polygon points="22,10 22,14 26,12 26,12"/>
+                                </svg>
+                            </div>
+                            <div class="style-body">
+                                <h3 class="style-name">家庭录像</h3>
+                                <p class="style-en">Home Camcorder</p>
+                                <div class="style-features">
+                                    <span class="feature-tag">晃动效果</span>
+                                    <span class="feature-tag">暖黄光</span>
+                                    <span class="feature-tag">回忆感</span>
+                                </div>
+                                <p class="style-story">晃动效果，回忆中才是真实的。父辈手持摄像机记录下的温暖瞬间。</p>
+                                <div class="style-use">
+                                    <strong>推荐用途：</strong>家庭聚会、婚礼记录、怀旧纪念视频
+                                </div>
+                            </div>
+                            <button class="style-detail-btn">查看详情 →</button>
+                        </div>
+                    </article>
+
+                    <!-- 超级 8 毫米 -->
+                    <article class="style-item" data-decade="1970s" data-keywords="super8 超级8 毫米 电影 复古 70年代 60年代">
+                        <div class="style-card">
+                            <div class="style-thumbnail" style="background: linear-gradient(135deg, #2d3748, #1a202c);">
+                                <span class="style-era-badge">1960s-70s</span>
+                                <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="style-icon">
+                                    <circle cx="12" cy="12" r="9"/><line x1="12" y1="3" x2="12" y2="21"/><line x1="3" y1="12" x2="21" y2="12"/>
+                                </svg>
+                            </div>
+                            <div class="style-body">
+                                <h3 class="style-name">超级 8 毫米</h3>
+                                <p class="style-en">Super 8mm Film</p>
+                                <div class="style-features">
+                                    <span class="feature-tag">胶片抖动</span>
+                                    <span class="feature-tag">暖橙色调</span>
+                                    <span class="feature-tag">胶片划痕</span>
+                                </div>
+                                <p class="style-story">胶片时代的家庭电影。60-70 年代最普及的家庭摄影格式，带着独特的时间质感。</p>
+                                <div class="style-use">
+                                    <strong>推荐用途：</strong>艺术短片、复古广告、年代剧质感
+                                </div>
+                            </div>
+                            <button class="style-detail-btn">查看详情 →</button>
+                        </div>
+                    </article>
+
+                    <!-- 赛博朋克 -->
+                    <article class="style-item" data-decade="1990s" data-keywords="cyber 赛博朋克 neon 霓虹 90年代 未来">
+                        <div class="style-card">
+                            <div class="style-thumbnail" style="background: linear-gradient(135deg, #0d1b2a, #1b263b);">
+                                <span class="style-era-badge">1990s</span>
+                                <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="style-icon">
+                                    <polygon points="12,2 22,8.5 22,15.5 12,22 2,15.5 2,8.5 12,2"/>
+                                </svg>
+                            </div>
+                            <div class="style-body">
+                                <h3 class="style-name">赛博朋克</h3>
+                                <p class="style-en">Cyberpunk</p>
+                                <div class="style-features">
+                                    <span class="feature-tag">霓虹色彩</span>
+                                    <span class="feature-tag">高对比度</span>
+                                    <span class="feature-tag">未来感</span>
+                                </div>
+                                <p class="style-story">90 年代科幻美学的巅峰。蓝紫霓虹与黑暗都市的结合，充满未来与反乌托邦气质。</p>
+                                <div class="style-use">
+                                    <strong>推荐用途：</strong>科技类内容、夜景城市、科幻题材
+                                </div>
+                            </div>
+                            <button class="style-detail-btn">查看详情 →</button>
+                        </div>
+                    </article>
+
+                    <!-- 极 simpl 风格 -->
+                    <article class="style-item" data-decade="2000s" data-keywords="minimal 极简 白平衡 干净 00年代 现代">
+                        <div class="style-card">
+                            <div class="style-thumbnail" style="background: linear-gradient(135deg, #e2e8f0, #cbd5e0);">
+                                <span class="style-era-badge">2000s</span>
+                                <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="style-icon">
+                                    <rect x="3" y="3" width="18" height="18" rx="2"/><line x1="9" y1="9" x2="15" y2="15"/><line x1="15" y1="9" x2="9" y2="15"/>
+                                </svg>
+                            </div>
+                            <div class="style-body">
+                                <h3 class="style-name">极简数码</h3>
+                                <p class="style-en">Minimal Digital</p>
+                                <div class="style-features">
+                                    <span class="feature-tag">高白平衡</span>
+                                    <span class="feature-tag">低对比度</span>
+                                    <span class="feature-tag">干净质感</span>
+                                </div>
+                                <p class="style-story">千禧年初期的数码影像美学。干净、明亮、不带多余情绪的记录风格。</p>
+                                <div class="style-use">
+                                    <strong>推荐用途：</strong>产品展示、教学视频、清新 Vlog
+                                </div>
+                            </div>
+                            <button class="style-detail-btn">查看详情 →</button>
+                        </div>
+                    </article>
+
+                    <!-- 黑白默片 -->
+                    <article class="style-item" data-decade="1920s" data-keywords="black white 黑白 默片 经典 20年代 1900s">
+                        <div class="style-card">
+                            <div class="style-thumbnail" style="background: linear-gradient(135deg, #1a202c, #000000);">
+                                <span class="style-era-badge">1920s</span>
+                                <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="style-icon">
+                                    <rect x="2" y="4" width="20" height="16" rx="2"/><circle cx="12" cy="12" r="4"/>
+                                </svg>
+                            </div>
+                            <div class="style-body">
+                                <h3 class="style-name">黑白默片</h3>
+                                <p class="style-en">Silent Era</p>
+                                <div class="style-features">
+                                    <span class="feature-tag">高对比度</span>
+                                    <span class="feature-tag">胶片噪点</span>
+                                    <span class="feature-tag">24fps</span>
+                                </div>
+                                <p class="style-story">电影最早的视觉语言。20 世纪 20 年代的默片时代，纯粹的黑白光影艺术。</p>
+                                <div class="style-use">
+                                    <strong>推荐用途：</strong>艺术短片、纪录片、高级感品牌视频
+                                </div>
+                            </div>
+                            <button class="style-detail-btn">查看详情 →</button>
+                        </div>
+                    </article>
+
+                </div>
+
+                <!-- 空状态 -->
+                <div class="empty-state hidden" id="emptyState">
+                    <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                    </svg>
+                    <p>未找到匹配的风格</p>
+                    <button class="btn btn-secondary" id="resetFilter">重置筛选</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- 风格详情弹窗 -->
+        <div class="style-modal hidden" id="styleModal">
+            <div class="modal-overlay"></div>
+            <div class="modal-content">
+                <button class="modal-close" id="modalClose">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                    </svg>
+                </button>
+                <div class="modal-header">
+                    <div class="modal-thumbnail" id="modalThumbnail"></div>
+                    <div class="modal-info">
+                        <span class="modal-era" id="modalEra"></span>
+                        <h2 class="modal-title" id="modalTitle"></h2>
+                        <p class="modal-en" id="modalEn"></p>
+                        <button class="btn btn-primary" id="modalCreate">立即创作</button>
+                    </div>
+                </div>
+                <div class="modal-body">
+                    <div class="modal-section">
+                        <h3>风格故事</h3>
+                        <p id="modalStory"></p>
+                    </div>
+                    <div class="modal-section">
+                        <h3>视觉特征</h3>
+                        <div class="modal-features" id="modalFeatures"></div>
+                    </div>
+                    <div class="modal-section">
+                        <h3>推荐用途</h3>
+                        <p id="modalUse"></p>
+                    </div>
+                    <div class="modal-section">
+                        <h3>参数预设</h3>
+                        <div class="modal-params" id="modalParams"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <script src="js/modules/navbar.js"></script>
+    <script src="js/modules/styles.js"></script>
+</body>
+</html>
