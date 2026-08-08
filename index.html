@@ -198,18 +198,17 @@
     </footer>
 
     <script src="js/modules/navbar.js"></script>
-    <script>
-// 测试 CSS 是否加载
+<script>
 fetch('css/global.css')
     .then(response => {
         if (response.ok) {
-            document.title = '✅ CSS 加载成功';
+            document.body.innerHTML = '<h1 style="font-size:24px; text-align:center; padding:48px;">✅ CSS 加载成功！</h1>';
         } else {
-            document.title = '❌ CSS 加载失败';
+            document.body.innerHTML = '<h1 style="font-size:24px; text-align:center; padding:48px; color:red;">❌ CSS 加载失败</h1>';
         }
     })
     .catch(error => {
-        document.title = '❌ CSS 路径错误';
+        document.body.innerHTML = '<h1 style="font-size:24px; text-align:center; padding:48px; color:red;">❌ CSS 路径错误</h1>';
     });
 </script>
 </body>
