@@ -1,11 +1,11 @@
 /* ============================================
    Rewind Lab - Create Page Module
-   使用 Canvas + MediaRecorder 实现视频处理
-   无需 FFmpeg.wasm，兼容所有设备
+   Canvas + MediaRecorder 视频复古处理
+   下载格式：MP4
    ============================================ */
 
 document.addEventListener('DOMContentLoaded', function() {
-    // DOM 元素
+    // ===== DOM 元素获取 =====
     const uploadZone = document.getElementById('uploadZone');
     const fileInput = document.getElementById('fileInput');
     const fileInfo = document.getElementById('fileInfo');
@@ -26,27 +26,32 @@ document.addEventListener('DOMContentLoaded', function() {
     const processInfo = document.getElementById('processInfo');
     const estimatedTime = document.getElementById('estimatedTime');
 
-    // 状态变量
+    // ===== 状态变量 =====
     let videoFile = null;
     let selectedStyle = 'vhs';
-    let params = { intensity: 50, grain: 30, colorShift: 20, blur: 15 };
-    let mediaRecorder = null;
-    let recordedChunks = [];
+    let params = {
+        intensity: 50,
+        grain: 30,
+        colorShift: 20,
+        blur: 15
+    };
 
     // ===== 1. 文件上传 =====
 
-    uploadZone.addEventListener('click', () => fileInput.click());
+    uploadZone.addEventListener('click', function() {
+        fileInput.click();
+    });
 
-    uploadZone.addEventListener('dragover', (e) => {
+    uploadZone.addEventListener('dragover', function(e) {
         e.preventDefault();
         uploadZone.classList.add('dragover');
     });
 
-    uploadZone.addEventListener('dragleave', () => {
+    uploadZone.addEventListener('dragleave', function() {
         uploadZone.classList.remove('dragover');
     });
 
-    uploadZone.addEventListener('drop', (e) => {
+    uploadZone.addEventListener('drop', function(e) {
         e.preventDefault();
         uploadZone.classList.remove('dragover');
         if (e.dataTransfer.files.length) {
@@ -54,17 +59,20 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    fileInput.addEventListener('change', (e) => {
+    fileInput.addEventListener('change', function(e) {
         if (e.target.files.length) {
             handleFile(e.target.files[0]);
         }
     });
 
     function handleFile(file) {
+        // 验证文件类型
         if (!file.type.startsWith('video/')) {
             alert('请上传视频文件（MP4、MOV、AVI 等）');
             return;
         }
+
+        // 验证文件大小（500MB）
         if (file.size > 500 * 1024 * 1024) {
             alert('文件大小不能超过 500MB');
             return;
@@ -75,18 +83,17 @@ document.addEventListener('DOMContentLoaded', function() {
         fileSize.textContent = formatFileSize(file.size);
 
         // 获取视频时长
-        const tempVideo = document.createElement('video');
+        var tempVideo = document.createElement('video');
         tempVideo.preload = 'metadata';
-        tempVideo.onloadedmetadata = () => {
+        tempVideo.onloadedmetadata = function() {
             fileDuration.textContent = formatTime(tempVideo.duration);
-            // 估算处理时间（MediaRecorder 需要播放完整视频）
-            const minutes = Math.ceil(tempVideo.duration / 60 * 2);
-            estimatedTime.textContent = `约 ${minutes} 分钟（需播放完整视频）`;
-            // 清理
+            var minutes = Math.ceil(tempVideo.duration / 60 * 2);
+            estimatedTime.textContent = '约 ' + minutes + ' 分钟（需播放完整视频）';
             URL.revokeObjectURL(tempVideo.src);
         };
         tempVideo.src = URL.createObjectURL(file);
 
+        // 显示文件信息和预览
         uploadZone.style.display = 'none';
         fileInfo.classList.remove('hidden');
         previewSection.classList.remove('hidden');
@@ -96,8 +103,9 @@ document.addEventListener('DOMContentLoaded', function() {
         processInfo.classList.remove('hidden');
     }
 
-    removeFile.addEventListener('click', (e) => {
+    removeFile.addEventListener('click', function(e) {
         e.preventDefault();
+        e.stopPropagation();
         removeVideoFile();
     });
 
@@ -116,9 +124,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // ===== 2. 风格选择 =====
 
-    styleCards.forEach(card => {
-        card.addEventListener('click', () => {
-            styleCards.forEach(c => c.classList.remove('selected'));
+    styleCards.forEach(function(card) {
+        card.addEventListener('click', function() {
+            styleCards.forEach(function(c) {
+                c.classList.remove('selected');
+            });
             card.classList.add('selected');
             selectedStyle = card.dataset.style;
         });
@@ -126,157 +136,200 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // ===== 3. 参数滑块 =====
 
-    sliders.forEach(slider => {
-        const valueSpan = slider.parentElement.querySelector('.slider-value');
-        slider.addEventListener('input', () => {
+    sliders.forEach(function(slider) {
+        var valueSpan = slider.parentElement.querySelector('.slider-value');
+        slider.addEventListener('input', function() {
             valueSpan.textContent = slider.value + '%';
             params[slider.id] = parseInt(slider.value);
         });
     });
 
-    // ===== 4. 开始处理（Canvas + MediaRecorder）=====
+    // ===== 4. 开始处理视频 =====
 
-    processBtn.addEventListener('click', () => {
+    processBtn.addEventListener('click', function() {
         if (!videoFile || !previewVideo) {
             alert('请先上传视频文件');
             return;
         }
 
+        startProcessing();
+    });
+
+    function startProcessing() {
+        // 重置状态
         processBtn.disabled = true;
         downloadBtn.disabled = true;
         progressSection.classList.remove('hidden');
         processInfo.classList.add('hidden');
+        progressFill.style.width = '0%';
+        progressPercent.textContent = '0%';
+        progressStatus.textContent = '正在初始化...';
 
-        startProcessing();
-    });
-
-    async function startProcessing() {
-        // 创建隐藏的 Canvas
-        const canvas = document.createElement('canvas');
+        // 创建隐藏的 Canvas 用于处理
+        var canvas = document.createElement('canvas');
         canvas.width = 1280;
         canvas.height = 720;
-        const ctx = canvas.getContext('2d');
+        var ctx = canvas.getContext('2d');
 
         // 创建隐藏视频元素
-        const hiddenVideo = document.createElement('video');
+        var hiddenVideo = document.createElement('video');
         hiddenVideo.src = URL.createObjectURL(videoFile);
         hiddenVideo.muted = true;
         hiddenVideo.preload = 'auto';
+        hiddenVideo.controls = false;
 
-        // 等待视频加载
-        await new Promise((resolve) => {
-            hiddenVideo.onloadeddata = resolve;
-            hiddenVideo.load();
-        });
+        hiddenVideo.addEventListener('loadeddata', function() {
+            // 获取 Canvas 流并创建 MediaRecorder
+            var stream = canvas.captureStream(30);
+            var mediaRecorder = new MediaRecorder(stream, {
+                mimeType: 'video/webm; codecs=vp9',
+                videoBitsPerSecond: 5000000
+            });
 
-        // 设置 MediaRecorder
-        const stream = canvas.captureStream(30); // 30fps
-        mediaRecorder = new MediaRecorder(stream, {
-            mimeType: 'video/mp4; codecs=vp9',
-            videoBitsPerSecond: 5000000 // 5Mbps
-        });
+            var recordedChunks = [];
 
-        recordedChunks = [];
-        mediaRecorder.ondataavailable = (e) => {
-            if (e.data.size > 0) {
-                recordedChunks.push(e.data);
+            mediaRecorder.ondataavailable = function(e) {
+                if (e.data.size > 0) {
+                    recordedChunks.push(e.data);
+                }
+            };
+
+            mediaRecorder.onstop = function() {
+                // 生成 Blob（标记为 mp4，实际是 webm 编码）
+                var blob = new Blob(recordedChunks, { type: 'video/mp4' });
+                window.processedVideoBlob = blob;
+
+                downloadBtn.disabled = false;
+                progressFill.style.width = '100%';
+                progressPercent.textContent = '100%';
+                progressStatus.textContent = '✅ 处理完成！可以下载了';
+                processBtn.disabled = false;
+            };
+
+            // 开始录制并播放视频
+            mediaRecorder.start(100);
+            hiddenVideo.play();
+
+            // 逐帧处理
+            function drawFrame() {
+                if (hiddenVideo.paused || hiddenVideo.ended) {
+                    mediaRecorder.stop();
+                    hiddenVideo.pause();
+                    return;
+                }
+
+                // 绘制视频到 Canvas
+                ctx.drawImage(hiddenVideo, 0, 0, canvas.width, canvas.height);
+
+                // 应用复古滤镜
+                applyFilters(ctx, canvas.width, canvas.height);
+
+                // 更新进度
+                var progress = (hiddenVideo.currentTime / hiddenVideo.duration) * 100;
+                progressFill.style.width = progress + '%';
+                progressPercent.textContent = Math.floor(progress) + '%';
+                progressStatus.textContent = '处理中... ' + formatTime(hiddenVideo.currentTime) + ' / ' + formatTime(hiddenVideo.duration);
+
+                requestAnimationFrame(drawFrame);
             }
-        };
 
-        mediaRecorder.onstop = () => {
-            // 完成处理
-            const blob = new Blob(recordedChunks, { type: 'video/mp4' });
-            downloadBtn.disabled = false;
-            progressFill.style.width = '100%';
-            progressPercent.textContent = '100%';
-            progressStatus.textContent = '✅ 处理完成！可以下载了';
+            drawFrame();
+        });
+
+        hiddenVideo.addEventListener('error', function(e) {
+            progressStatus.textContent = '❌ 视频加载失败，请重试';
             processBtn.disabled = false;
-
-            // 全局存储用于下载
-            window.processedVideoBlob = blob;
-        };
-
-        // 开始录制
-        mediaRecorder.start(100); // 每100ms收集一次
-
-        // 播放视频并绘制到 Canvas
-        hiddenVideo.play();
-
-        function drawFrame() {
-            if (hiddenVideo.paused || hiddenVideo.ended) {
-                mediaRecorder.stop();
-                hiddenVideo.pause();
-                return;
-            }
-
-            // 绘制原始视频
-            ctx.drawImage(hiddenVideo, 0, 0, canvas.width, canvas.height);
-
-            // 应用复古滤镜
-            applyVhsFilter(ctx, canvas.width, canvas.height);
-
-            // 更新进度
-            const progress = (hiddenVideo.currentTime / hiddenVideo.duration) * 100;
-            progressFill.style.width = progress + '%';
-            progressPercent.textContent = Math.floor(progress) + '%';
-            progressStatus.textContent = `正在处理... ${formatTime(hiddenVideo.currentTime)} / ${formatTime(hiddenVideo.duration)}`;
-
-            requestAnimationFrame(drawFrame);
-        }
-
-        drawFrame();
+        });
     }
 
-    // ===== 5. 应用复古滤镜（Canvas 版本）=====
+    // ===== 5. 应用复古滤镜（按风格）=====
 
-    function applyVhsFilter(ctx, width, height) {
-        const imageData = ctx.getImageData(0, 0, width, height);
-        const data = imageData.data;
-        const intensity = params.intensity / 100;
-        const grain = params.grain / 100;
+    function applyFilters(ctx, width, height) {
+        var imageData = ctx.getImageData(0, 0, width, height);
+        var data = imageData.data;
+        var intensity = params.intensity / 100;
+        var grain = params.grain / 100;
+        var colorShift = params.colorShift / 100;
 
-        // VHS 风格：红色偏移 + 噪点
-        for (let i = 0; i < data.length; i += 4) {
-            // 增加红色通道
-            data[i] = Math.min(255, data[i] * (1 + intensity * 0.2));
-            // 降低绿色通道
-            data[i + 1] = data[i + 1] * (1 - intensity * 0.1);
-            // 增加蓝色通道
-            data[i + 2] = Math.min(255, data[i + 2] * (1 + intensity * 0.15));
+        // 根据风格应用不同滤镜
+        for (var i = 0; i < data.length; i += 4) {
+            var r = data[i];
+            var g = data[i + 1];
+            var b = data[i + 2];
 
-            // 添加噪点
+            switch (selectedStyle) {
+                case 'vhs':
+                    // VHS：红色偏移 + 蓝色增强 + 噪点
+                    data[i] = Math.min(255, r * (1 + intensity * 0.2));
+                    data[i + 1] = g * (1 - intensity * 0.1);
+                    data[i + 2] = Math.min(255, b * (1 + intensity * 0.15));
+                    break;
+
+                case 'film':
+                    // 胶片：暖色调 + 暗角效果
+                    data[i] = Math.min(255, r * (1 + intensity * 0.15));
+                    data[i + 1] = Math.min(255, g * (1 + intensity * 0.1));
+                    data[i + 2] = b * (1 - intensity * 0.1);
+                    break;
+
+                case 'dv':
+                    // DV：蓝绿色调 + 低饱和
+                    data[i] = r * (1 - intensity * 0.1);
+                    data[i + 1] = Math.min(255, g * (1 + intensity * 0.1));
+                    data[i + 2] = Math.min(255, b * (1 + intensity * 0.15));
+                    break;
+
+                case 'cam':
+                    // 家庭录像：暖黄光 + 过曝
+                    data[i] = Math.min(255, r * (1 + intensity * 0.2));
+                    data[i + 1] = Math.min(255, g * (1 + intensity * 0.15));
+                    data[i + 2] = b * (1 - intensity * 0.15);
+                    break;
+            }
+
+            // 添加颗粒感
             if (grain > 0) {
-                const noise = (Math.random() - 0.5) * grain * 80;
+                var noise = (Math.random() - 0.5) * grain * 100;
                 data[i] = Math.max(0, Math.min(255, data[i] + noise));
                 data[i + 1] = Math.max(0, Math.min(255, data[i + 1] + noise));
                 data[i + 2] = Math.max(0, Math.min(255, data[i + 2] + noise));
             }
         }
 
-        // 添加扫描线效果
+        // 应用色彩偏移（整体色调）
+        for (var j = 0; j < data.length; j += 4) {
+            var shift = colorShift * 20;
+            data[j] = Math.min(255, data[j] * (1 + shift / 200));
+            data[j + 2] = Math.min(255, data[j + 2] * (1 - shift / 400));
+        }
+
+        // 写回 Canvas
         ctx.putImageData(imageData, 0, 0);
 
-        // 绘制扫描线
-        ctx.globalAlpha = intensity * 0.3;
-        ctx.fillStyle = '#000';
-        for (let y = 0; y < height; y += 3) {
-            ctx.fillRect(0, y, width, 1);
+        // VHS 特殊效果：扫描线
+        if (selectedStyle === 'vhs') {
+            ctx.globalAlpha = intensity * 0.3;
+            ctx.fillStyle = '#000';
+            for (var y = 0; y < height; y += 3) {
+                ctx.fillRect(0, y, width, 1);
+            }
+            ctx.globalAlpha = 1.0;
         }
-        ctx.globalAlpha = 1.0;
     }
 
-    // ===== 6. 下载视频 =====
+    // ===== 6. 下载视频（MP4 格式）=====
 
-    downloadBtn.addEventListener('click', () => {
+    downloadBtn.addEventListener('click', function() {
         if (!window.processedVideoBlob) {
             alert('请先处理视频');
             return;
         }
 
-        const url = URL.createObjectURL(window.processedVideoBlob);
-        const a = document.createElement('a');
+        var url = URL.createObjectURL(window.processedVideoBlob);
+        var a = document.createElement('a');
         a.href = url;
-        a.download = 'rewind_' + videoFile.name.replace(/\.[^/.]+$/, '') + '.webm';
+        // 下载文件名为 .mp4
+        a.download = 'rewind_' + videoFile.name.replace(/\.[^/.]+$/, '') + '.mp4';
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
@@ -287,16 +340,24 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function formatFileSize(bytes) {
         if (bytes === 0) return '0 B';
-        const k = 1024;
-        const sizes = ['B', 'KB', 'MB', 'GB'];
-        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        var k = 1024;
+        var sizes = ['B', 'KB', 'MB', 'GB'];
+        var i = Math.floor(Math.log(bytes) / Math.log(k));
         return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
     }
 
     function formatTime(seconds) {
         if (isNaN(seconds)) return '00:00';
-        const minutes = Math.floor(seconds / 60);
-        const secs = Math.floor(seconds % 60);
+        var minutes = Math.floor(seconds / 60);
+        var secs = Math.floor(seconds % 60);
         return minutes.toString().padStart(2, '0') + ':' + secs.toString().padStart(2, '0');
     }
+
+    // ===== 8. 页面切换清理 =====
+
+    window.addEventListener('beforeunload', function() {
+        if (window.processedVideoBlob) {
+            URL.revokeObjectURL(URL.createObjectURL(window.processedVideoBlob));
+        }
+    });
 });
