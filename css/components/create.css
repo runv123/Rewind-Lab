@@ -1,49 +1,108 @@
-/* ============================================
-   Rewind Lab - Create Page Styles
-   ============================================ */
-
-.create-main {
-    padding-top: 96px;
-    padding-bottom: 48px;
-    min-height: calc(100vh - 64px);
+/* 加载横幅 */
+.loading-banner {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    padding: 24px;
     background: var(--color-surface);
+    border-radius: var(--radius-lg);
+    margin-bottom: 24px;
 }
 
-.page-hero {
-    text-align: center;
-    padding: 24px 0;
+.loading-spinner {
+    width: 24px;
+    height: 24px;
+    border: 3px solid var(--color-border);
+    border-top-color: var(--color-primary);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
 }
 
-.page-hero h1 {
-    font-size: 32px;
-    font-weight: 700;
-    color: var(--color-text);
-    margin-bottom: 8px;
+@keyframes spin {
+    to { transform: rotate(360deg); }
 }
 
-.page-hero p {
-    font-size: 16px;
+.loading-banner span {
     color: var(--color-text-light);
 }
 
-/* ===== 工作区布局 ===== */
-.create-workspace {
-    display: grid;
-    grid-template-columns: 1.2fr 1fr;
-    gap: 24px;
-    max-width: 1200px;
-    margin: 0 auto;
+/* 处理信息 */
+.process-info {
+    margin-top: 16px;
+    padding: 16px;
+    background: rgba(230, 126, 34, 0.05);
+    border-radius: var(--radius-md);
+    border-left: 3px solid var(--color-primary);
+    font-size: 13px;
+    color: var(--color-text-light);
+    line-height: 1.8;
 }
 
-.workspace-left,
-.workspace-right {
-    background: var(--color-background);
-    border-radius: var(--radius-lg);
-    padding: 24px;
-    box-shadow: var(--shadow-sm);
+.process-info:not(.hidden) {
+    display: block;
 }
 
-/* ===== 上传区域 ===== */
+.file-meta {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+/* 进度区域 */
+.progress-section {
+    padding: 16px;
+    background: var(--color-surface);
+    border-radius: var(--radius-md);
+    margin-top: 16px;
+}
+
+.progress-section:not(.hidden) {
+    display: block;
+}
+
+.progress-header {
+    display: flex;
+    justify-content: space-between;
+    font-size: 13px;
+    color: var(--color-text-light);
+    margin-bottom: 8px;
+}
+
+.progress-bar {
+    height: 8px;
+    background: var(--color-border);
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 8px;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--color-primary), var(--color-primary-dark));
+    width: 0%;
+    transition: width 0.3s ease;
+    border-radius: 4px;
+}
+
+.progress-status {
+    font-size: 12px;
+    color: var(--color-text-light);
+    text-align: center;
+}
+
+/* 进度区域默认隐藏 */
+.progress-section,
+.process-info {
+    display: none;
+}
+
+.progress-section:not(.hidden),
+.process-info:not(.hidden) {
+    display: block;
+}
+
+/* 上传区域 */
 .upload-zone {
     border: 2px dashed var(--color-border);
     border-radius: var(--radius-lg);
@@ -52,14 +111,12 @@
     background: var(--color-surface);
     cursor: pointer;
     transition: all var(--transition-normal);
-    position: relative;
 }
 
 .upload-zone:hover,
 .upload-zone.dragover {
     border-color: var(--color-primary);
     background: rgba(230, 126, 34, 0.05);
-    transform: translateY(-2px);
 }
 
 .upload-icon {
@@ -79,17 +136,16 @@
     color: var(--color-text-light);
 }
 
-/* ===== 文件信息 ===== */
+/* 文件信息 */
 .file-info {
-    display: none;
     background: var(--color-surface);
     border-radius: var(--radius-md);
     padding: 16px;
     margin-top: 16px;
 }
 
-.file-info:not(.hidden) {
-    display: block;
+.file-info.hidden {
+    display: none;
 }
 
 .file-header {
@@ -107,7 +163,7 @@
 .file-meta {
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    gap: 12px;
 }
 
 .file-meta span {
@@ -115,6 +171,7 @@
     color: var(--color-text-light);
 }
 
+/* 按钮样式 */
 .btn-sm {
     padding: 6px 12px;
     font-size: 12px;
@@ -124,6 +181,7 @@
     color: var(--color-text-light);
     cursor: pointer;
     transition: all var(--transition-fast);
+    margin-left: auto;
 }
 
 .btn-sm:hover {
@@ -131,14 +189,13 @@
     color: var(--color-error);
 }
 
-/* ===== 预览区域 ===== */
+/* 预览区域 */
 .preview-section {
-    display: none;
     margin-top: 24px;
 }
 
-.preview-section:not(.hidden) {
-    display: block;
+.preview-section.hidden {
+    display: none;
 }
 
 .preview-section h3 {
@@ -152,53 +209,27 @@
     background: #000;
     border-radius: var(--radius-md);
     overflow: hidden;
-    position: relative;
     aspect-ratio: 16/9;
 }
 
-.preview-container canvas {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
+/* 工作区布局 */
+.create-workspace {
+    display: grid;
+    grid-template-columns: 1.2fr 1fr;
+    gap: 24px;
+    max-width: 1200px;
+    margin: 0 auto;
 }
 
-.preview-controls {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    padding: 12px;
-    background: linear-gradient(transparent, rgba(0,0,0,0.8));
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    color: #fff;
-}
-
-.preview-controls .btn-sm {
-    background: rgba(255,255,255,0.2);
-    border: 1px solid rgba(255,255,255,0.3);
-    color: #fff;
-}
-
-.preview-controls .btn-sm:hover {
-    background: rgba(255,255,255,0.3);
-    border-color: #fff;
-    color: #fff;
-}
-
-.preview-controls span {
-    font-size: 12px;
-    margin-left: auto;
-}
-
-/* ===== 风格选择器 ===== */
+.workspace-left,
 .workspace-right {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
+    background: var(--color-background);
+    border-radius: var(--radius-lg);
+    padding: 24px;
+    box-shadow: var(--shadow-sm);
 }
 
+/* 风格选择器 */
 .style-selector h3,
 .param-panel h3 {
     font-size: 16px;
@@ -248,7 +279,6 @@
     background: rgba(0, 0, 0, 0.5);
     padding: 2px 6px;
     border-radius: var(--radius-sm);
-    letter-spacing: 0.05em;
 }
 
 .style-info {
@@ -269,13 +299,13 @@
     color: var(--color-text-light);
 }
 
-/* ===== 参数面板 ===== */
-.param-group {
-    margin-bottom: 16px;
+/* 参数面板 */
+.param-panel {
+    margin-top: 20px;
 }
 
-.param-group:last-child {
-    margin-bottom: 0;
+.param-group {
+    margin-bottom: 16px;
 }
 
 .param-group label {
@@ -292,18 +322,15 @@
     background: var(--color-border);
     outline: none;
     -webkit-appearance: none;
-    appearance: none;
 }
 
 .slider::-webkit-slider-thumb {
     -webkit-appearance: none;
-    appearance: none;
     width: 18px;
     height: 18px;
     border-radius: 50%;
     background: var(--color-primary);
     cursor: pointer;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
 }
 
 .slider::-moz-range-thumb {
@@ -323,11 +350,12 @@
     font-weight: 600;
 }
 
-/* ===== 操作面板 ===== */
+/* 操作面板 */
 .action-panel {
     display: flex;
     flex-direction: column;
     gap: 12px;
+    margin-top: 20px;
 }
 
 .btn-lg {
@@ -345,49 +373,7 @@
     cursor: not-allowed;
 }
 
-/* ===== 进度区域 ===== */
-.progress-section {
-    display: none;
-    padding: 16px;
-    background: var(--color-surface);
-    border-radius: var(--radius-md);
-}
-
-.progress-section:not(.hidden) {
-    display: block;
-}
-
-.progress-header {
-    display: flex;
-    justify-content: space-between;
-    font-size: 13px;
-    color: var(--color-text-light);
-    margin-bottom: 8px;
-}
-
-.progress-bar {
-    height: 8px;
-    background: var(--color-border);
-    border-radius: 4px;
-    overflow: hidden;
-    margin-bottom: 8px;
-}
-
-.progress-fill {
-    height: 100%;
-    background: linear-gradient(90deg, var(--color-primary), var(--color-primary-dark));
-    width: 0%;
-    transition: width 0.3s ease;
-    border-radius: 4px;
-}
-
-.progress-status {
-    font-size: 12px;
-    color: var(--color-text-light);
-    text-align: center;
-}
-
-/* ===== 功能卡片 ===== */
+/* 功能卡片 */
 .create-features {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -422,59 +408,29 @@
     line-height: 1.5;
 }
 
-/* ===== 响应式适配 ===== */
+/* 响应式 */
 @media (max-width: 992px) {
     .create-workspace {
         grid-template-columns: 1fr;
     }
-    
     .create-features {
         grid-template-columns: 1fr;
     }
 }
 
 @media (max-width: 768px) {
-    .create-main {
-        padding-top: 80px;
-        padding-bottom: 32px;
-    }
-    
-    .workspace-left,
-    .workspace-right {
-        padding: 16px;
-    }
-    
-    .upload-zone {
-        padding: 32px 16px;
-    }
-    
     .style-grid {
         grid-template-columns: repeat(4, 1fr);
     }
-    
     .style-thumbnail {
         height: 60px;
     }
-    
-    .style-info h4 {
-        font-size: 11px;
-    }
-    
-    .style-info p {
-        display: none;
-    }
-}
-
-@media (max-width: 480px) {
-    .style-grid {
-        grid-template-columns: repeat(2, 1fr);
-    }
-    
     .action-panel {
         flex-direction: row;
     }
-    
     .btn-lg {
         flex: 1;
+        padding: 12px 16px;
+        font-size: 13px;
     }
 }
