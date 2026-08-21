@@ -50,9 +50,9 @@ body {
     background-color: var(--color-background);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    min-height: 100vh;
+    /*min-height: 100vh;
     display: flex;
-    flex-direction: column;
+    flex-direction: column;*/
 }
 
 /* ===== 通用容器 ===== */
