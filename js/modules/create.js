@@ -1,13 +1,11 @@
 /* ============================================
    Rewind Lab - Create Page Module
-   集成 FFmpeg.wasm 实现真正的视频处理
+   使用 Canvas + MediaRecorder 实现视频处理
+   无需 FFmpeg.wasm，兼容所有设备
    ============================================ */
 
-document.addEventListener('DOMContentLoaded', async function() {
+document.addEventListener('DOMContentLoaded', function() {
     // DOM 元素
-    const loadingBanner = document.getElementById('loadingBanner');
-    const loadingText = document.getElementById('loadingText');
-    const createWorkspace = document.getElementById('createWorkspace');
     const uploadZone = document.getElementById('uploadZone');
     const fileInput = document.getElementById('fileInput');
     const fileInfo = document.getElementById('fileInfo');
@@ -29,63 +27,13 @@ document.addEventListener('DOMContentLoaded', async function() {
     const estimatedTime = document.getElementById('estimatedTime');
 
     // 状态变量
-    let ffmpeg = null;
     let videoFile = null;
     let selectedStyle = 'vhs';
     let params = { intensity: 50, grain: 30, colorShift: 20, blur: 15 };
-    let processedBlob = null;
+    let mediaRecorder = null;
+    let recordedChunks = [];
 
-    // ===== 1. 加载 FFmpeg.wasm =====
-    
-    try {
-        loadingText.textContent = '正在加载视频处理引擎...';
-        
-        // 动态导入 FFmpeg.wasm
-        const { FFmpeg } = await import('https://unpkg.com/@ffmpeg/ffmpeg@0.12.10/dist/umd/ffmpeg.js');
-        const { toBlobURL } = await import('https://unpkg.com/@ffmpeg/util@0.12.1/dist/umd/util.js');
-
-        ffmpeg = new FFmpeg();
-
-        // 设置进度回调
-        ffmpeg.on('progress', ({ progress, time }) => {
-            const percent = Math.round(progress * 100);
-            progressFill.style.width = percent + '%';
-            progressPercent.textContent = percent + '%';
-            progressStatus.textContent = `正在处理... (${formatTime(time / 1000000)})`;
-        });
-
-        ffmpeg.on('log', ({ message }) => {
-            console.log('FFmpeg:', message);
-        });
-
-        ffmpeg.on('start', () => {
-            progressStatus.textContent = '正在初始化...';
-        });
-
-        // 加载 FFmpeg 核心
-        loadingText.textContent = '正在下载处理引擎（约25MB）...';
-        const coreURL = await toBlobURL('https://unpkg.com/@ffmpeg/core@0.12.6/dist/umd/ffmpeg-core.js', 'text/javascript');
-        await ffmpeg.load({ coreURL });
-
-        // 加载完成
-        loadingBanner.style.display = 'none';
-        createWorkspace.style.display = '';
-        loadingText.textContent = '视频处理引擎已就绪';
-        
-        console.log('FFmpeg.wasm 加载成功');
-    } catch (error) {
-        console.error('FFmpeg 加载失败:', error);
-        loadingText.textContent = '⚠️ 视频处理引擎加载失败，请刷新页面重试';
-        loadingBanner.innerHTML = `
-            <div style="text-align:center;color:var(--color-error)">
-                <p style="font-size:18px;margin-bottom:12px">⚠️ 视频处理引擎加载失败</p>
-                <p>请检查网络连接后刷新页面</p>
-                <p style="font-size:12px;color:var(--color-text-light);margin-top:12px">错误信息：${error.message}</p>
-            </div>
-        `;
-    }
-
-    // ===== 2. 文件上传 =====
+    // ===== 1. 文件上传 =====
 
     uploadZone.addEventListener('click', () => fileInput.click());
 
@@ -113,13 +61,10 @@ document.addEventListener('DOMContentLoaded', async function() {
     });
 
     function handleFile(file) {
-        // 验证文件类型
         if (!file.type.startsWith('video/')) {
             alert('请上传视频文件（MP4、MOV、AVI 等）');
             return;
         }
-
-        // 验证文件大小（500MB）
         if (file.size > 500 * 1024 * 1024) {
             alert('文件大小不能超过 500MB');
             return;
@@ -130,14 +75,17 @@ document.addEventListener('DOMContentLoaded', async function() {
         fileSize.textContent = formatFileSize(file.size);
 
         // 获取视频时长
-        const video = document.createElement('video');
-        video.preload = 'metadata';
-        video.onloadedmetadata = () => {
-            fileDuration.textContent = formatTime(video.duration);
-            // 估算处理时间
-            estimateProcessingTime(video.duration);
+        const tempVideo = document.createElement('video');
+        tempVideo.preload = 'metadata';
+        tempVideo.onloadedmetadata = () => {
+            fileDuration.textContent = formatTime(tempVideo.duration);
+            // 估算处理时间（MediaRecorder 需要播放完整视频）
+            const minutes = Math.ceil(tempVideo.duration / 60 * 2);
+            estimatedTime.textContent = `约 ${minutes} 分钟（需播放完整视频）`;
+            // 清理
+            URL.revokeObjectURL(tempVideo.src);
         };
-        video.src = URL.createObjectURL(file);
+        tempVideo.src = URL.createObjectURL(file);
 
         uploadZone.style.display = 'none';
         fileInfo.classList.remove('hidden');
@@ -155,7 +103,6 @@ document.addEventListener('DOMContentLoaded', async function() {
 
     function removeVideoFile() {
         videoFile = null;
-        processedBlob = null;
         fileInput.value = '';
         previewVideo.src = '';
         uploadZone.style.display = '';
@@ -167,7 +114,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         progressSection.classList.add('hidden');
     }
 
-    // ===== 3. 风格选择 =====
+    // ===== 2. 风格选择 =====
 
     styleCards.forEach(card => {
         card.addEventListener('click', () => {
@@ -177,7 +124,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         });
     });
 
-    // ===== 4. 参数滑块 =====
+    // ===== 3. 参数滑块 =====
 
     sliders.forEach(slider => {
         const valueSpan = slider.parentElement.querySelector('.slider-value');
@@ -187,68 +134,149 @@ document.addEventListener('DOMContentLoaded', async function() {
         });
     });
 
-    // ===== 5. 视频处理（核心功能）=====
+    // ===== 4. 开始处理（Canvas + MediaRecorder）=====
 
-    processBtn.addEventListener('click', async () => {
-        if (!videoFile || !ffmpeg) {
+    processBtn.addEventListener('click', () => {
+        if (!videoFile || !previewVideo) {
             alert('请先上传视频文件');
             return;
         }
 
-        // 禁用按钮
         processBtn.disabled = true;
         downloadBtn.disabled = true;
         progressSection.classList.remove('hidden');
-        progressFill.style.width = '0%';
-        progressPercent.textContent = '0%';
+        processInfo.classList.add('hidden');
 
-        try {
-            // 将文件写入 FFmpeg 虚拟文件系统
-            progressStatus.textContent = '正在写入文件...';
-            await ffmpeg.writeFile('input.mp4', await fileToUint8Array(videoFile));
+        startProcessing();
+    });
 
-            // 构建 FFmpeg 命令
-            progressStatus.textContent = '正在构建滤镜链...';
-            const ffmpegCommand = buildFFmpegCommand();
+    async function startProcessing() {
+        // 创建隐藏的 Canvas
+        const canvas = document.createElement('canvas');
+        canvas.width = 1280;
+        canvas.height = 720;
+        const ctx = canvas.getContext('2d');
 
-            // 执行视频处理
-            progressStatus.textContent = '正在处理视频...';
-            await ffmpeg.exec(ffmpegCommand);
+        // 创建隐藏视频元素
+        const hiddenVideo = document.createElement('video');
+        hiddenVideo.src = URL.createObjectURL(videoFile);
+        hiddenVideo.muted = true;
+        hiddenVideo.preload = 'auto';
 
-            // 读取输出文件
-            progressStatus.textContent = '正在生成输出文件...';
-            const data = await ffmpeg.readFile('output.mp4');
-            processedBlob = new Blob([data.buffer], { type: 'video/mp4' });
+        // 等待视频加载
+        await new Promise((resolve) => {
+            hiddenVideo.onloadeddata = resolve;
+            hiddenVideo.load();
+        });
 
-            // 完成
+        // 设置 MediaRecorder
+        const stream = canvas.captureStream(30); // 30fps
+        mediaRecorder = new MediaRecorder(stream, {
+            mimeType: 'video/webm; codecs=vp9',
+            videoBitsPerSecond: 5000000 // 5Mbps
+        });
+
+        recordedChunks = [];
+        mediaRecorder.ondataavailable = (e) => {
+            if (e.data.size > 0) {
+                recordedChunks.push(e.data);
+            }
+        };
+
+        mediaRecorder.onstop = () => {
+            // 完成处理
+            const blob = new Blob(recordedChunks, { type: 'video/webm' });
+            downloadBtn.disabled = false;
             progressFill.style.width = '100%';
             progressPercent.textContent = '100%';
             progressStatus.textContent = '✅ 处理完成！可以下载了';
-            downloadBtn.disabled = false;
-
-            // 清理虚拟文件系统
-            await ffmpeg.deleteFile('input.mp4');
-            await ffmpeg.deleteFile('output.mp4');
-
-        } catch (error) {
-            console.error('视频处理失败:', error);
-            progressStatus.textContent = '❌ 处理失败：' + error.message;
             processBtn.disabled = false;
+
+            // 全局存储用于下载
+            window.processedVideoBlob = blob;
+        };
+
+        // 开始录制
+        mediaRecorder.start(100); // 每100ms收集一次
+
+        // 播放视频并绘制到 Canvas
+        hiddenVideo.play();
+
+        function drawFrame() {
+            if (hiddenVideo.paused || hiddenVideo.ended) {
+                mediaRecorder.stop();
+                hiddenVideo.pause();
+                return;
+            }
+
+            // 绘制原始视频
+            ctx.drawImage(hiddenVideo, 0, 0, canvas.width, canvas.height);
+
+            // 应用复古滤镜
+            applyVhsFilter(ctx, canvas.width, canvas.height);
+
+            // 更新进度
+            const progress = (hiddenVideo.currentTime / hiddenVideo.duration) * 100;
+            progressFill.style.width = progress + '%';
+            progressPercent.textContent = Math.floor(progress) + '%';
+            progressStatus.textContent = `正在处理... ${formatTime(hiddenVideo.currentTime)} / ${formatTime(hiddenVideo.duration)}`;
+
+            requestAnimationFrame(drawFrame);
         }
-    });
+
+        drawFrame();
+    }
+
+    // ===== 5. 应用复古滤镜（Canvas 版本）=====
+
+    function applyVhsFilter(ctx, width, height) {
+        const imageData = ctx.getImageData(0, 0, width, height);
+        const data = imageData.data;
+        const intensity = params.intensity / 100;
+        const grain = params.grain / 100;
+
+        // VHS 风格：红色偏移 + 噪点
+        for (let i = 0; i < data.length; i += 4) {
+            // 增加红色通道
+            data[i] = Math.min(255, data[i] * (1 + intensity * 0.2));
+            // 降低绿色通道
+            data[i + 1] = data[i + 1] * (1 - intensity * 0.1);
+            // 增加蓝色通道
+            data[i + 2] = Math.min(255, data[i + 2] * (1 + intensity * 0.15));
+
+            // 添加噪点
+            if (grain > 0) {
+                const noise = (Math.random() - 0.5) * grain * 80;
+                data[i] = Math.max(0, Math.min(255, data[i] + noise));
+                data[i + 1] = Math.max(0, Math.min(255, data[i + 1] + noise));
+                data[i + 2] = Math.max(0, Math.min(255, data[i + 2] + noise));
+            }
+        }
+
+        // 添加扫描线效果
+        ctx.putImageData(imageData, 0, 0);
+
+        // 绘制扫描线
+        ctx.globalAlpha = intensity * 0.3;
+        ctx.fillStyle = '#000';
+        for (let y = 0; y < height; y += 3) {
+            ctx.fillRect(0, y, width, 1);
+        }
+        ctx.globalAlpha = 1.0;
+    }
 
     // ===== 6. 下载视频 =====
 
     downloadBtn.addEventListener('click', () => {
-        if (!processedBlob) {
+        if (!window.processedVideoBlob) {
             alert('请先处理视频');
             return;
         }
 
-        const url = URL.createObjectURL(processedBlob);
+        const url = URL.createObjectURL(window.processedVideoBlob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = 'rewind_' + videoFile.name;
+        a.download = 'rewind_' + videoFile.name.replace(/\.[^/.]+$/, '') + '.webm';
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
@@ -256,15 +284,6 @@ document.addEventListener('DOMContentLoaded', async function() {
     });
 
     // ===== 7. 工具函数 =====
-
-    function fileToUint8Array(file) {
-        return new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.onload = () => resolve(new Uint8Array(reader.result));
-            reader.onerror = reject;
-            reader.readAsArrayBuffer(file);
-        });
-    }
 
     function formatFileSize(bytes) {
         if (bytes === 0) return '0 B';
@@ -280,95 +299,4 @@ document.addEventListener('DOMContentLoaded', async function() {
         const secs = Math.floor(seconds % 60);
         return minutes.toString().padStart(2, '0') + ':' + secs.toString().padStart(2, '0');
     }
-
-    function estimateProcessingTime(duration) {
-        // 根据视频时长估算处理时间（分钟）
-        const minutes = Math.ceil(duration / 60 * 1.5); // 1.5倍时长
-        estimatedTime.textContent = `约 ${minutes} 分钟`;
-    }
-
-    // ===== 8. 构建 FFmpeg 命令（核心）=====
-
-    function buildFFmpegCommand() {
-        const style = selectedStyle;
-        const intensity = params.intensity / 100;
-        const grain = params.grain / 100;
-        const colorShift = params.colorShift / 100;
-        const blurAmount = params.blur / 100;
-
-        // 基础命令
-        let command = ['-i', 'input.mp4'];
-
-        // 滤镜链
-        let filters = [];
-
-        switch (style) {
-            case 'vhs':
-                // VHS 录像带效果：扫描线 + 色彩偏移 + 噪点
-                filters.push(`hue=s=${1 - intensity * 0.3}:H=${intensity * 20}`); // 色调调整
-                filters.push(`eq=brightness=${-intensity * 0.1}:contrast=${1 + intensity * 0.2}`); // 亮度对比度
-                filters.push(`noise=alls=${grain * 64}:allf=t+st:fr=1`); // 噪点
-                filters.push(`geq=r='X/W*255*sin((X+Y)/${10 + blurAmount * 5})':g='X/W*255':b='X/W*255*sin((X-Y)/${15 + blurAmount * 3})'`); // 色彩偏移
-                filters.push(`split[a][b];[a]format=yuv420p[a2];[b]scale=854:480[b2];[a2][b2]overlay=0:0`); // 低分辨率
-                break;
-
-            case 'film':
-                // 胶片效果：颗粒 + 暖色 + 暗角
-                filters.push(`curves=vintage_75`); // 胶片曲线
-                filters.push(`colorbalance=rb=${intensity * 0.2}:gb=${intensity * 0.1}:bb=${-intensity * 0.1}`); // 暖色调
-                filters.push(`vignette=${1 - intensity * 0.3}:${1 + intensity * 0.2}`); // 暗角
-                filters.push(`noise=alls=${grain * 32}:allf=t+st:fr=1`); // 颗粒
-                filters.push(`format=yuv420p`);
-                break;
-
-            case 'dv':
-                // DV 数字摄像机：低分辨率 + 色彩压缩
-                filters.push(`scale=854:480`); // 降低分辨率
-                filters.push(`unsharp=5:5:${intensity * 1.0}`); // 模糊
-                filters.push(`eq=saturation=${1 - intensity * 0.3}:brightness=${-intensity * 0.05}`); // 降低饱和
-                filters.push(`noise=alls=${grain * 16}:allf=t+st:fr=1`); // 轻微噪点
-                filters.push(`metadata=mode=insert:file=metadata.txt`); // 时间戳
-                filters.push(`format=yuv420p`);
-                break;
-
-            case 'cam':
-                // 家庭录像：暖黄光 + 轻微晃动 + 过曝
-                filters.push(`colorchannelmixer=rr=1.1:gg=1.05:bb=0.9`); // 暖色调
-                filters.push(`eq=brightness=${intensity * 0.1}:contrast=${1 - intensity * 0.1}`); // 过曝
-                filters.push(`geq=r='if(eq(X,0),0,PX+W*${blurAmount * 0.1})':g='if(eq(X,0),0,PX+W*${blurAmount * 0.1})':b='if(eq(X,0),0,PX+W*${blurAmount * 0.1})'`); // 轻微模糊
-                filters.push(`noise=alls=${grain * 24}:allf=t+st:fr=1`); // 颗粒
-                filters.push(`vignette=0.8:0.5`); // 暗角
-                filters.push(`format=yuv420p`);
-                break;
-        }
-
-        // 添加通用后处理
-        filters.push(`fps=24`); // 帧率
-        filters.push(`format=yuv420p`); // 色彩格式
-
-        command.push('-vf', filters.join(','));
-        command.push('-c:v', 'libx264'); // 视频编码器
-        command.push('-preset', 'medium'); // 编码预设
-        command.push('-crf', '23'); // 质量
-        command.push('-c:a', 'aac'); // 音频编码器
-        command.push('-b:a', '128k'); // 音频比特率
-        command.push('-movflags', '+faststart'); // 优化网络播放
-        command.push('output.mp4');
-
-        return command;
-    }
-
-    // ===== 9. 页面切换清理 =====
-
-    window.addEventListener('beforeunload', () => {
-        if (ffmpeg) {
-            ffmpeg.terminate();
-        }
-    });
-
-    // 暴露到全局（供其他模块使用）
-    window.rewindLab = {
-        getFFmpeg: () => ffmpeg,
-        isReady: () => ffmpeg !== null
-    };
 });
