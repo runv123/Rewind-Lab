@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>创建 | Rewind Lab</title>
+<title>创建 | Rewind Lab - 复古视频工具</title>
 <link rel="stylesheet" href="css/global.css">
 <link rel="stylesheet" href="css/components/navbar.css">
 <link rel="stylesheet" href="css/components/create.css">
@@ -108,11 +108,19 @@
 
 <div class="action-panel">
 <button class="btn btn-primary btn-lg" id="processBtn" disabled>
-<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+<polyline points="7 10 12 15 17 10"/>
+<line x1="12" y1="15" x2="12" y2="3"/>
+</svg>
 开始处理
 </button>
 <button class="btn btn-secondary btn-lg" id="downloadBtn" disabled>
-<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+<polyline points="7 10 12 15 17 10"/>
+<line x1="12" y1="15" x2="12" y2="3"/>
+</svg>
 下载视频
 </button>
 </div>
@@ -126,7 +134,7 @@
 <div class="process-info hidden" id="processInfo">
 <p>💡 处理完全在您的浏览器中进行，视频不会上传到服务器</p>
 <p>⏱️ 预计时间：<span id="estimatedTime">约1分钟</span></p>
-<p>📁 输出格式：MP4</p>
+<p>📁 输出格式：WebM</p>
 <p>⚠️ 处理过程中请勿离开页面</p>
 </div>
 </div>
@@ -167,6 +175,5 @@
 
 <script src="js/modules/navbar.js"></script>
 <script src="js/modules/create.js"></script>
-
 </body>
 </html>
