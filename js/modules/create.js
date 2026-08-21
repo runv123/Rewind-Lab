@@ -1,59 +1,104 @@
 /* ============================================
    Rewind Lab - Create Page Module
-   视频上传、预览、处理和下载
+   集成 FFmpeg.wasm 实现真正的视频处理
    ============================================ */
 
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', async function() {
     // DOM 元素
-    var uploadZone = document.getElementById('uploadZone');
-    var fileInput = document.getElementById('fileInput');
-    var fileInfo = document.getElementById('fileInfo');
-    var fileName = document.getElementById('fileName');
-    var fileSize = document.getElementById('fileSize');
-    var removeFile = document.getElementById('removeFile');
-    var previewSection = document.getElementById('previewSection');
-    var previewCanvas = document.getElementById('previewCanvas');
-    var playPause = document.getElementById('playPause');
-    var timeDisplay = document.getElementById('timeDisplay');
-    var muteToggle = document.getElementById('muteToggle');
-    var styleCards = document.querySelectorAll('.style-card');
-    var sliders = document.querySelectorAll('.slider');
-    var processBtn = document.getElementById('processBtn');
-    var downloadBtn = document.getElementById('downloadBtn');
-    var progressSection = document.getElementById('progressSection');
-    var progressFill = document.getElementById('progressFill');
-    var progressPercent = document.getElementById('progressPercent');
-    var progressStatus = document.getElementById('progressStatus');
+    const loadingBanner = document.getElementById('loadingBanner');
+    const loadingText = document.getElementById('loadingText');
+    const createWorkspace = document.getElementById('createWorkspace');
+    const uploadZone = document.getElementById('uploadZone');
+    const fileInput = document.getElementById('fileInput');
+    const fileInfo = document.getElementById('fileInfo');
+    const fileName = document.getElementById('fileName');
+    const fileSize = document.getElementById('fileSize');
+    const fileDuration = document.getElementById('fileDuration');
+    const removeFile = document.getElementById('removeFile');
+    const previewSection = document.getElementById('previewSection');
+    const previewVideo = document.getElementById('previewVideo');
+    const styleCards = document.querySelectorAll('.style-card');
+    const sliders = document.querySelectorAll('.slider');
+    const processBtn = document.getElementById('processBtn');
+    const downloadBtn = document.getElementById('downloadBtn');
+    const progressSection = document.getElementById('progressSection');
+    const progressFill = document.getElementById('progressFill');
+    const progressPercent = document.getElementById('progressPercent');
+    const progressStatus = document.getElementById('progressStatus');
+    const processInfo = document.getElementById('processInfo');
+    const estimatedTime = document.getElementById('estimatedTime');
 
     // 状态变量
-    var videoFile = null;
-    var video = null;
-    var isPlaying = false;
-    var isMuted = false;
-    var selectedStyle = 'vhs';
-    var params = {
-        intensity: 50,
-        grain: 30,
-        colorShift: 20,
-        blur: 15
-    };
+    let ffmpeg = null;
+    let videoFile = null;
+    let selectedStyle = 'vhs';
+    let params = { intensity: 50, grain: 30, colorShift: 20, blur: 15 };
+    let processedBlob = null;
 
-    // ===== 文件上传 =====
+    // ===== 1. 加载 FFmpeg.wasm =====
     
-    uploadZone.addEventListener('click', function() {
-        fileInput.click();
-    });
+    try {
+        loadingText.textContent = '正在加载视频处理引擎...';
+        
+        // 动态导入 FFmpeg.wasm
+        const { FFmpeg } = await import('https://unpkg.com/@ffmpeg/ffmpeg@0.12.10/dist/umd/ffmpeg.js');
+        const { toBlobURL } = await import('https://unpkg.com/@ffmpeg/util@0.12.1/dist/umd/util.js');
 
-    uploadZone.addEventListener('dragover', function(e) {
+        ffmpeg = new FFmpeg();
+
+        // 设置进度回调
+        ffmpeg.on('progress', ({ progress, time }) => {
+            const percent = Math.round(progress * 100);
+            progressFill.style.width = percent + '%';
+            progressPercent.textContent = percent + '%';
+            progressStatus.textContent = `正在处理... (${formatTime(time / 1000000)})`;
+        });
+
+        ffmpeg.on('log', ({ message }) => {
+            console.log('FFmpeg:', message);
+        });
+
+        ffmpeg.on('start', () => {
+            progressStatus.textContent = '正在初始化...';
+        });
+
+        // 加载 FFmpeg 核心
+        loadingText.textContent = '正在下载处理引擎（约25MB）...';
+        const coreURL = await toBlobURL('https://unpkg.com/@ffmpeg/core@0.12.6/dist/umd/ffmpeg-core.js', 'text/javascript');
+        await ffmpeg.load({ coreURL });
+
+        // 加载完成
+        loadingBanner.style.display = 'none';
+        createWorkspace.style.display = '';
+        loadingText.textContent = '视频处理引擎已就绪';
+        
+        console.log('FFmpeg.wasm 加载成功');
+    } catch (error) {
+        console.error('FFmpeg 加载失败:', error);
+        loadingText.textContent = '⚠️ 视频处理引擎加载失败，请刷新页面重试';
+        loadingBanner.innerHTML = `
+            <div style="text-align:center;color:var(--color-error)">
+                <p style="font-size:18px;margin-bottom:12px">⚠️ 视频处理引擎加载失败</p>
+                <p>请检查网络连接后刷新页面</p>
+                <p style="font-size:12px;color:var(--color-text-light);margin-top:12px">错误信息：${error.message}</p>
+            </div>
+        `;
+    }
+
+    // ===== 2. 文件上传 =====
+
+    uploadZone.addEventListener('click', () => fileInput.click());
+
+    uploadZone.addEventListener('dragover', (e) => {
         e.preventDefault();
         uploadZone.classList.add('dragover');
     });
 
-    uploadZone.addEventListener('dragleave', function() {
+    uploadZone.addEventListener('dragleave', () => {
         uploadZone.classList.remove('dragover');
     });
 
-    uploadZone.addEventListener('drop', function(e) {
+    uploadZone.addEventListener('drop', (e) => {
         e.preventDefault();
         uploadZone.classList.remove('dragover');
         if (e.dataTransfer.files.length) {
@@ -61,18 +106,20 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    fileInput.addEventListener('change', function(e) {
+    fileInput.addEventListener('change', (e) => {
         if (e.target.files.length) {
             handleFile(e.target.files[0]);
         }
     });
 
     function handleFile(file) {
+        // 验证文件类型
         if (!file.type.startsWith('video/')) {
-            alert('请上传视频文件');
+            alert('请上传视频文件（MP4、MOV、AVI 等）');
             return;
         }
 
+        // 验证文件大小（500MB）
         if (file.size > 500 * 1024 * 1024) {
             alert('文件大小不能超过 500MB');
             return;
@@ -82,270 +129,246 @@ document.addEventListener('DOMContentLoaded', function() {
         fileName.textContent = file.name;
         fileSize.textContent = formatFileSize(file.size);
 
+        // 获取视频时长
+        const video = document.createElement('video');
+        video.preload = 'metadata';
+        video.onloadedmetadata = () => {
+            fileDuration.textContent = formatTime(video.duration);
+            // 估算处理时间
+            estimateProcessingTime(video.duration);
+        };
+        video.src = URL.createObjectURL(file);
+
         uploadZone.style.display = 'none';
         fileInfo.classList.remove('hidden');
-
-        createVideoPreview();
+        previewSection.classList.remove('hidden');
+        previewVideo.src = URL.createObjectURL(file);
+        previewVideo.load();
         processBtn.disabled = false;
+        processInfo.classList.remove('hidden');
     }
 
-    function formatFileSize(bytes) {
-        if (bytes === 0) return '0 B';
-        var k = 1024;
-        var sizes = ['B', 'KB', 'MB', 'GB'];
-        var i = Math.floor(Math.log(bytes) / Math.log(k));
-        return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
-    }
-
-    removeFile.addEventListener('click', function(e) {
+    removeFile.addEventListener('click', (e) => {
         e.preventDefault();
-        e.stopPropagation();
         removeVideoFile();
     });
 
     function removeVideoFile() {
         videoFile = null;
-        if (video) {
-            video.pause();
-            video.src = '';
-            video = null;
-        }
+        processedBlob = null;
         fileInput.value = '';
-        uploadZone.style.display = 'block';
+        previewVideo.src = '';
+        uploadZone.style.display = '';
         fileInfo.classList.add('hidden');
         previewSection.classList.add('hidden');
         processBtn.disabled = true;
         downloadBtn.disabled = true;
+        processInfo.classList.add('hidden');
+        progressSection.classList.add('hidden');
     }
 
-    // ===== 视频预览 =====
-    
-    function createVideoPreview() {
-        var url = URL.createObjectURL(videoFile);
-        video = document.createElement('video');
-        video.src = url;
-        video.crossOrigin = 'anonymous';
-        video.style.display = 'none';
+    // ===== 3. 风格选择 =====
 
-        video.addEventListener('loadedmetadata', function() {
-            timeDisplay.textContent = '00:00 / ' + formatTime(video.duration);
-        });
-
-        video.addEventListener('timeupdate', function() {
-            timeDisplay.textContent = formatTime(video.currentTime) + ' / ' + formatTime(video.duration);
-        });
-
-        document.body.appendChild(video);
-        previewSection.classList.remove('hidden');
-        startPreview();
-    }
-
-    function formatTime(seconds) {
-        if (isNaN(seconds)) return '00:00';
-        var minutes = Math.floor(seconds / 60);
-        var secs = Math.floor(seconds % 60);
-        return minutes.toString().padStart(2, '0') + ':' + secs.toString().padStart(2, '0');
-    }
-
-    function startPreview() {
-        if (!video) return;
-
-        var ctx = previewCanvas.getContext('2d');
-        var animId;
-
-        function drawFrame() {
-            if (video.paused || video.ended) {
-                ctx.drawImage(video, 0, 0, previewCanvas.width, previewCanvas.height);
-                return;
-            }
-
-            ctx.drawImage(video, 0, 0, previewCanvas.width, previewCanvas.height);
-            applyFilters(ctx, previewCanvas.width, previewCanvas.height);
-            animId = requestAnimationFrame(drawFrame);
-        }
-
-        drawFrame();
-    }
-
-    playPause.addEventListener('click', function() {
-        if (!video) return;
-        if (isPlaying) {
-            video.pause();
-            playPause.textContent = '▶ 播放';
-        } else {
-            video.play();
-            playPause.textContent = '⏸ 暂停';
-        }
-        isPlaying = !isPlaying;
-    });
-
-    muteToggle.addEventListener('click', function() {
-        if (!video) return;
-        isMuted = !isMuted;
-        video.muted = isMuted;
-        muteToggle.textContent = isMuted ? '🔇 静音' : '🔊 静音';
-    });
-
-    // ===== 风格选择 =====
-    
-    styleCards.forEach(function(card) {
-        card.addEventListener('click', function() {
-            styleCards.forEach(function(c) { c.classList.remove('selected'); });
+    styleCards.forEach(card => {
+        card.addEventListener('click', () => {
+            styleCards.forEach(c => c.classList.remove('selected'));
             card.classList.add('selected');
             selectedStyle = card.dataset.style;
         });
     });
 
-    // ===== 参数滑块 =====
-    
-    sliders.forEach(function(slider) {
-        var valueSpan = slider.parentElement.querySelector('.slider-value');
-        var paramKey = slider.id;
-        
-        slider.addEventListener('input', function() {
+    // ===== 4. 参数滑块 =====
+
+    sliders.forEach(slider => {
+        const valueSpan = slider.parentElement.querySelector('.slider-value');
+        slider.addEventListener('input', () => {
             valueSpan.textContent = slider.value + '%';
-            params[paramKey] = parseInt(slider.value);
+            params[slider.id] = parseInt(slider.value);
         });
     });
 
-    // ===== 应用滤镜效果 =====
-    
-    function applyFilters(ctx, width, height) {
-        // 获取当前图像数据
-        var imageData = ctx.getImageData(0, 0, width, height);
-        var data = imageData.data;
+    // ===== 5. 视频处理（核心功能）=====
 
-        // 复古强度
-        var intensity = params.intensity / 100;
-        var grainAmount = params.grain / 100;
-        var colorShiftAmount = params.colorShift / 100;
-        var blurAmount = params.blur / 100;
-
-        // 应用像素级滤镜
-        for (var i = 0; i < data.length; i += 4) {
-            var r = data[i];
-            var g = data[i + 1];
-            var b = data[i + 2];
-
-            // VHS 风格：增加红色和蓝色偏移
-            if (selectedStyle === 'vhs') {
-                data[i] = Math.min(255, r * (1 + intensity * 0.2));
-                data[i + 1] = g * (1 - intensity * 0.1);
-                data[i + 2] = Math.min(255, b * (1 + intensity * 0.15));
-            }
-            // 胶片风格：暖色调，增加颗粒
-            else if (selectedStyle === 'film') {
-                data[i] = Math.min(255, r * 1.1);
-                data[i + 1] = g * 1.05;
-                data[i + 2] = b * 0.9;
-            }
-            // DV 风格：增加蓝绿色调
-            else if (selectedStyle === 'dv') {
-                data[i] = r * (1 - intensity * 0.1);
-                data[i + 1] = Math.min(255, g * (1 + intensity * 0.1));
-                data[i + 2] = Math.min(255, b * (1 + intensity * 0.15));
-            }
-            // 家庭录像：暖黄色调
-            else if (selectedStyle === 'cam') {
-                data[i] = Math.min(255, r * (1 + intensity * 0.15));
-                data[i + 1] = Math.min(255, g * (1 + intensity * 0.1));
-                data[i + 2] = b * (1 - intensity * 0.1);
-            }
-
-            // 添加颗粒效果
-            if (grainAmount > 0) {
-                var noise = (Math.random() - 0.5) * grainAmount * 100;
-                data[i] = Math.max(0, Math.min(255, data[i] + noise));
-                data[i + 1] = Math.max(0, Math.min(255, data[i + 1] + noise));
-                data[i + 2] = Math.max(0, Math.min(255, data[i + 2] + noise));
-            }
-        }
-
-        // 应用色彩偏移（整体色调调整）
-        for (var j = 0; j < data.length; j += 4) {
-            var shift = colorShiftAmount * 20;
-            data[j] = Math.min(255, data[j] * (1 + shift / 100));
-            data[j + 2] = Math.min(255, data[j + 2] * (1 - shift / 200));
-        }
-    }
-
-    // ===== 处理视频 =====
-    
-    processBtn.addEventListener('click', function() {
-        if (!videoFile || !video) {
+    processBtn.addEventListener('click', async () => {
+        if (!videoFile || !ffmpeg) {
             alert('请先上传视频文件');
             return;
         }
 
+        // 禁用按钮
         processBtn.disabled = true;
-        progressSection.classList.remove('hidden');
         downloadBtn.disabled = true;
+        progressSection.classList.remove('hidden');
+        progressFill.style.width = '0%';
+        progressPercent.textContent = '0%';
 
-        simulateProcessing();
+        try {
+            // 将文件写入 FFmpeg 虚拟文件系统
+            progressStatus.textContent = '正在写入文件...';
+            await ffmpeg.writeFile('input.mp4', await fileToUint8Array(videoFile));
+
+            // 构建 FFmpeg 命令
+            progressStatus.textContent = '正在构建滤镜链...';
+            const ffmpegCommand = buildFFmpegCommand();
+
+            // 执行视频处理
+            progressStatus.textContent = '正在处理视频...';
+            await ffmpeg.exec(ffmpegCommand);
+
+            // 读取输出文件
+            progressStatus.textContent = '正在生成输出文件...';
+            const data = await ffmpeg.readFile('output.mp4');
+            processedBlob = new Blob([data.buffer], { type: 'video/mp4' });
+
+            // 完成
+            progressFill.style.width = '100%';
+            progressPercent.textContent = '100%';
+            progressStatus.textContent = '✅ 处理完成！可以下载了';
+            downloadBtn.disabled = false;
+
+            // 清理虚拟文件系统
+            await ffmpeg.deleteFile('input.mp4');
+            await ffmpeg.deleteFile('output.mp4');
+
+        } catch (error) {
+            console.error('视频处理失败:', error);
+            progressStatus.textContent = '❌ 处理失败：' + error.message;
+            processBtn.disabled = false;
+        }
     });
 
-    function simulateProcessing() {
-        var progress = 0;
-        var statuses = [
-            '正在初始化...',
-            '正在分析视频...',
-            '正在应用滤镜效果...',
-            '正在处理帧...',
-            '正在渲染输出...',
-            '处理完成！'
-        ];
+    // ===== 6. 下载视频 =====
 
-        var statusIndex = 0;
-
-        var interval = setInterval(function() {
-            progress += Math.random() * 5;
-            if (progress >= 100) {
-                progress = 100;
-                clearInterval(interval);
-                
-                setTimeout(function() {
-                    progressStatus.textContent = '✅ 处理完成！可以下载了';
-                    downloadBtn.disabled = false;
-                }, 500);
-            }
-
-            progressFill.style.width = progress + '%';
-            progressPercent.textContent = Math.floor(progress) + '%';
-
-            if (progress > 20 && statusIndex === 0) statusIndex = 1;
-            if (progress > 40 && statusIndex === 1) statusIndex = 2;
-            if (progress > 60 && statusIndex === 2) statusIndex = 3;
-            if (progress > 80 && statusIndex === 3) statusIndex = 4;
-            if (progress >= 100) statusIndex = 5;
-
-            progressStatus.textContent = statuses[statusIndex];
-        }, 100);
-    }
-
-    // ===== 下载视频 =====
-    
-    downloadBtn.addEventListener('click', function() {
-        if (!videoFile) {
-            alert('请先上传并处理视频');
+    downloadBtn.addEventListener('click', () => {
+        if (!processedBlob) {
+            alert('请先处理视频');
             return;
         }
 
-        // 实际项目中，这里应该调用 WebCodecs API 或 FFmpeg.wasm 进行视频转码
-        // 当前演示版本直接下载原文件（已应用预览效果说明）
-        
-        var link = document.createElement('a');
-        link.href = URL.createObjectURL(videoFile);
-        link.download = 'rewind_' + videoFile.name;
-        link.click();
-
-        alert('视频下载已开始！\n\n注意：当前版本为演示模式，下载的文件为原始视频。\n完整功能将在 V1.1 版本中实现真正的视频转码。');
+        const url = URL.createObjectURL(processedBlob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'rewind_' + videoFile.name;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
     });
 
-    // 清理资源
-    window.addEventListener('beforeunload', function() {
-        if (video) {
-            video.pause();
-            video.src = '';
+    // ===== 7. 工具函数 =====
+
+    function fileToUint8Array(file) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(new Uint8Array(reader.result));
+            reader.onerror = reject;
+            reader.readAsArrayBuffer(file);
+        });
+    }
+
+    function formatFileSize(bytes) {
+        if (bytes === 0) return '0 B';
+        const k = 1024;
+        const sizes = ['B', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+    }
+
+    function formatTime(seconds) {
+        if (isNaN(seconds)) return '00:00';
+        const minutes = Math.floor(seconds / 60);
+        const secs = Math.floor(seconds % 60);
+        return minutes.toString().padStart(2, '0') + ':' + secs.toString().padStart(2, '0');
+    }
+
+    function estimateProcessingTime(duration) {
+        // 根据视频时长估算处理时间（分钟）
+        const minutes = Math.ceil(duration / 60 * 1.5); // 1.5倍时长
+        estimatedTime.textContent = `约 ${minutes} 分钟`;
+    }
+
+    // ===== 8. 构建 FFmpeg 命令（核心）=====
+
+    function buildFFmpegCommand() {
+        const style = selectedStyle;
+        const intensity = params.intensity / 100;
+        const grain = params.grain / 100;
+        const colorShift = params.colorShift / 100;
+        const blurAmount = params.blur / 100;
+
+        // 基础命令
+        let command = ['-i', 'input.mp4'];
+
+        // 滤镜链
+        let filters = [];
+
+        switch (style) {
+            case 'vhs':
+                // VHS 录像带效果：扫描线 + 色彩偏移 + 噪点
+                filters.push(`hue=s=${1 - intensity * 0.3}:H=${intensity * 20}`); // 色调调整
+                filters.push(`eq=brightness=${-intensity * 0.1}:contrast=${1 + intensity * 0.2}`); // 亮度对比度
+                filters.push(`noise=alls=${grain * 64}:allf=t+st:fr=1`); // 噪点
+                filters.push(`geq=r='X/W*255*sin((X+Y)/${10 + blurAmount * 5})':g='X/W*255':b='X/W*255*sin((X-Y)/${15 + blurAmount * 3})'`); // 色彩偏移
+                filters.push(`split[a][b];[a]format=yuv420p[a2];[b]scale=854:480[b2];[a2][b2]overlay=0:0`); // 低分辨率
+                break;
+
+            case 'film':
+                // 胶片效果：颗粒 + 暖色 + 暗角
+                filters.push(`curves=vintage_75`); // 胶片曲线
+                filters.push(`colorbalance=rb=${intensity * 0.2}:gb=${intensity * 0.1}:bb=${-intensity * 0.1}`); // 暖色调
+                filters.push(`vignette=${1 - intensity * 0.3}:${1 + intensity * 0.2}`); // 暗角
+                filters.push(`noise=alls=${grain * 32}:allf=t+st:fr=1`); // 颗粒
+                filters.push(`format=yuv420p`);
+                break;
+
+            case 'dv':
+                // DV 数字摄像机：低分辨率 + 色彩压缩
+                filters.push(`scale=854:480`); // 降低分辨率
+                filters.push(`unsharp=5:5:${intensity * 1.0}`); // 模糊
+                filters.push(`eq=saturation=${1 - intensity * 0.3}:brightness=${-intensity * 0.05}`); // 降低饱和
+                filters.push(`noise=alls=${grain * 16}:allf=t+st:fr=1`); // 轻微噪点
+                filters.push(`metadata=mode=insert:file=metadata.txt`); // 时间戳
+                filters.push(`format=yuv420p`);
+                break;
+
+            case 'cam':
+                // 家庭录像：暖黄光 + 轻微晃动 + 过曝
+                filters.push(`colorchannelmixer=rr=1.1:gg=1.05:bb=0.9`); // 暖色调
+                filters.push(`eq=brightness=${intensity * 0.1}:contrast=${1 - intensity * 0.1}`); // 过曝
+                filters.push(`geq=r='if(eq(X,0),0,PX+W*${blurAmount * 0.1})':g='if(eq(X,0),0,PX+W*${blurAmount * 0.1})':b='if(eq(X,0),0,PX+W*${blurAmount * 0.1})'`); // 轻微模糊
+                filters.push(`noise=alls=${grain * 24}:allf=t+st:fr=1`); // 颗粒
+                filters.push(`vignette=0.8:0.5`); // 暗角
+                filters.push(`format=yuv420p`);
+                break;
+        }
+
+        // 添加通用后处理
+        filters.push(`fps=24`); // 帧率
+        filters.push(`format=yuv420p`); // 色彩格式
+
+        command.push('-vf', filters.join(','));
+        command.push('-c:v', 'libx264'); // 视频编码器
+        command.push('-preset', 'medium'); // 编码预设
+        command.push('-crf', '23'); // 质量
+        command.push('-c:a', 'aac'); // 音频编码器
+        command.push('-b:a', '128k'); // 音频比特率
+        command.push('-movflags', '+faststart'); // 优化网络播放
+        command.push('output.mp4');
+
+        return command;
+    }
+
+    // ===== 9. 页面切换清理 =====
+
+    window.addEventListener('beforeunload', () => {
+        if (ffmpeg) {
+            ffmpeg.terminate();
         }
     });
+
+    // 暴露到全局（供其他模块使用）
+    window.rewindLab = {
+        getFFmpeg: () => ffmpeg,
+        isReady: () => ffmpeg !== null
+    };
 });
