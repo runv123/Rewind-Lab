@@ -172,7 +172,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // 设置 MediaRecorder
         const stream = canvas.captureStream(30); // 30fps
         mediaRecorder = new MediaRecorder(stream, {
-            mimeType: 'video/webm; codecs=vp9',
+            mimeType: 'video/mp4; codecs=vp9',
             videoBitsPerSecond: 5000000 // 5Mbps
         });
 
@@ -185,7 +185,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         mediaRecorder.onstop = () => {
             // 完成处理
-            const blob = new Blob(recordedChunks, { type: 'video/webm' });
+            const blob = new Blob(recordedChunks, { type: 'video/mp4' });
             downloadBtn.disabled = false;
             progressFill.style.width = '100%';
             progressPercent.textContent = '100%';
